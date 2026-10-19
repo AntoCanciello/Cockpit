@@ -106,8 +106,8 @@ main {
 .leaflet-control-attribution { font-size: 9px !important; background: rgba(255,255,255,.75) !important; color: #444 !important; }
 .leaflet-control-attribution a { color: #444 !important; }
 .map-msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--muted); }
-.me-dot { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); border: 3px solid #fff; box-shadow: 0 0 0 7px rgba(59,140,255,.22), 0 2px 6px rgba(0,0,0,.45); display: grid; place-items: center; }
-.me-arrow { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 9px solid #fff; margin-top: -2px; }
+.me-nav { width: 44px; height: 44px; transition: transform .45s linear; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+.me-nav svg { width: 44px; height: 44px; }
 .dest-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; background: #e5484d; transform: rotate(-45deg); border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
 .nav-banner { position: absolute; top: 12px; left: 12px; right: 12px; z-index: 2; display: flex; align-items: center; gap: 14px; padding: 10px 16px 10px 10px; border-radius: 20px; background: var(--nav); color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
 .nav-ico { width: 60px; height: 60px; border-radius: 14px; background: rgba(255,255,255,.16); display: grid; place-items: center; flex: 0 0 auto; }
@@ -142,37 +142,38 @@ main {
 .speed small { font-size: 12px; letter-spacing: 1.2px; color: var(--muted); font-weight: 600; }
 .map-br { position: absolute; z-index: 2; right: 12px; bottom: 22px; display: flex; flex-direction: column; gap: 10px; }
 .fab.follow-on { color: var(--accent); }
+.fab.muted { color: #e5484d; }
 
 /* ---------- Radio ---------- */
 #pRadio { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: linear-gradient(160deg, #1b2230, var(--panel) 60%); }
-.station { display: flex; align-items: center; gap: 14px; }
-.station-logo { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: #fff; color: #000; font-weight: 900; font-size: 13px; letter-spacing: -.3px; line-height: .95; text-align: center; flex: 0 0 auto; }
-.station { min-width: 0; }
-.station > div { min-width: 0; }
-.station h2 { overflow: hidden; text-overflow: ellipsis; }
-.station h2 { margin: 0; font-size: 21px; font-weight: 800; white-space: nowrap; }
-.radio-ctrl { display: flex; align-items: center; gap: 18px; }
-.status { display: flex; align-items: center; gap: 7px; font-size: 14px; color: var(--muted); margin-top: 3px; }
-.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.st-logo { position: relative; width: 84px; height: 84px; border-radius: 20px; background: #fff; color: #0b0e13; display: grid; place-items: center; overflow: hidden; flex: 0 0 auto; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.st-logo img { width: 100%; height: 100%; object-fit: contain; padding: 8%; }
+.st-logo span { font-weight: 900; font-size: 14px; line-height: 1.05; text-align: center; padding: 6px; text-transform: uppercase; letter-spacing: -.3px; word-break: break-word; }
+.st-logo::after { content: ""; position: absolute; top: 7px; right: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--live); border: 2px solid #fff; opacity: 0; }
+.playing .st-logo::after { opacity: 1; animation: pulse 1.6s infinite; }
+.st-meta { display: flex; align-items: center; gap: 10px; max-width: 100%; min-width: 0; font-size: 14px; }
+.st-meta b { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.status { display: flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
+.status i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
 .status.live i { background: var(--live); animation: pulse 1.6s infinite; }
 .status.live { color: var(--fg); }
 @keyframes pulse { 50% { opacity: .35; } }
-.eq { display: flex; align-items: flex-end; gap: 4px; height: 26px; }
-.eq span { width: 5px; height: 6px; border-radius: 3px; background: var(--accent); }
-.playing .eq span { animation: eq 1s ease-in-out infinite; }
-.eq span:nth-child(2) { animation-delay: -.3s !important; }
-.eq span:nth-child(3) { animation-delay: -.6s !important; }
-.eq span:nth-child(4) { animation-delay: -.15s !important; }
-.eq span:nth-child(5) { animation-delay: -.45s !important; }
-@keyframes eq { 0%,100% { height: 6px; } 50% { height: 26px; } }
-.play { flex: 0 0 auto; width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: #0b0e13; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
-.play svg { width: 32px; height: 32px; }
-.play:active { transform: scale(.95); }
-#app[data-mode="radio"] .play { width: 120px; height: 120px; }
-#app[data-mode="radio"] .play svg { width: 54px; height: 54px; }
-#app[data-mode="radio"] .station-logo { width: 96px; height: 96px; font-size: 22px; border-radius: 26px; }
-#app[data-mode="radio"] .station h2 { font-size: 34px; }
-#app[data-mode="radio"] #pRadio { gap: 28px; }
+.radio-ctrl { display: flex; align-items: center; gap: 22px; }
+.rbtn { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--panel-2); color: var(--fg); flex: 0 0 auto; }
+.rbtn svg { width: 24px; height: 24px; }
+.rbtn:disabled { opacity: .3; }
+.rbtn:active, .play:active { transform: scale(.94); }
+.play { flex: 0 0 auto; width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: var(--fg); color: #0b0e13; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+.play svg { width: 30px; height: 30px; }
+#app[data-mode="radio"] #pRadio { gap: 22px; }
+#app[data-mode="radio"] .st-logo { width: 160px; height: 160px; border-radius: 34px; }
+#app[data-mode="radio"] .st-logo span { font-size: 26px; }
+#app[data-mode="radio"] .st-meta { font-size: 20px; }
+#app[data-mode="radio"] .radio-ctrl { gap: 36px; }
+#app[data-mode="radio"] .play { width: 104px; height: 104px; }
+#app[data-mode="radio"] .play svg { width: 46px; height: 46px; }
+#app[data-mode="radio"] .rbtn { width: 72px; height: 72px; }
+#app[data-mode="radio"] .rbtn svg { width: 32px; height: 32px; }
 
 /* ---------- Contatti ---------- */
 #pContacts { display: flex; flex-direction: column; padding: 10px; gap: 8px; }
@@ -232,6 +233,19 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 .chip svg { width: 20px; height: 20px; color: var(--accent); }
 
 /* ---------- Schermi bassi (Safari con le barre, iPhone mini) ---------- */
+#stage.short #app[data-mode="home"] #pRadio { gap: 8px; padding: 8px; }
+#stage.short #app[data-mode="home"] .st-logo { width: 56px; height: 56px; border-radius: 14px; }
+#stage.short #app[data-mode="home"] .st-logo span { font-size: 10px; }
+#stage.short #app[data-mode="home"] .st-meta { display: none; }
+#stage.short #app[data-mode="home"] .radio-ctrl { gap: 16px; }
+#stage.short #app[data-mode="home"] .play { width: 54px; height: 54px; }
+#stage.short #app[data-mode="home"] .play svg { width: 24px; height: 24px; }
+#stage.short #app[data-mode="home"] .rbtn { width: 42px; height: 42px; }
+#stage.short #app[data-mode="home"] .rbtn svg { width: 20px; height: 20px; }
+#stage.short #app[data-mode="radio"] #pRadio { gap: 14px; }
+#stage.short #app[data-mode="radio"] .st-logo { width: 110px; height: 110px; border-radius: 26px; }
+#stage.short #app[data-mode="radio"] .play { width: 84px; height: 84px; }
+#stage.short #app[data-mode="radio"] .rbtn { width: 60px; height: 60px; }
 #stage.short .rail { width: 80px; padding: 8px 6px; gap: 4px; }
 #stage.short .brand { width: 38px; height: 38px; }
 #stage.short .brand svg { width: 24px; height: 24px; }
@@ -240,23 +254,12 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 #stage.short .rail nav { gap: 4px; }
 #stage.short .nav-btn { border-radius: 14px; }
 #stage.short .nav-btn svg { width: 24px; height: 24px; }
-#stage.short #app[data-mode="home"] #pRadio { flex-direction: row; justify-content: space-between; gap: 12px; padding: 10px 14px; }
-#stage.short #app[data-mode="home"] .radio-ctrl .eq { display: none; }
-#stage.short #app[data-mode="home"] .play { width: 60px; height: 60px; }
-#stage.short #app[data-mode="home"] .play svg { width: 26px; height: 26px; }
-#stage.short #app[data-mode="home"] .station { gap: 10px; }
-#stage.short #app[data-mode="home"] .station-logo { width: 46px; height: 46px; font-size: 11px; border-radius: 13px; }
-#stage.short #app[data-mode="home"] .station h2 { font-size: 17px; }
-#stage.short #app[data-mode="home"] .play { flex: 0 0 auto; }
-#stage.short #app[data-mode="home"] .status { font-size: 13px; }
 #stage.short #app[data-mode="home"] #pContacts { padding: 8px; gap: 6px; }
 #stage.short #app[data-mode="home"] .contact { padding: 3px 3px 3px 8px; gap: 8px; border-radius: 12px; }
 #stage.short #app[data-mode="home"] .avatar { width: 30px; height: 30px; font-size: 13px; }
 #stage.short #app[data-mode="home"] .contact .name { font-size: 15px; }
 #stage.short #app[data-mode="home"] .cbtn { width: 36px; height: 36px; border-radius: 11px; }
 #stage.short #app[data-mode="home"] .cbtn svg { width: 20px; height: 20px; }
-#stage.short #app[data-mode="radio"] .play { width: 96px; height: 96px; }
-#stage.short #app[data-mode="radio"] #pRadio { gap: 18px; }
 #stage.short #app[data-mode="contacts"] .avatar { width: 48px; height: 48px; font-size: 19px; }
 #stage.short #app[data-mode="contacts"] .cbtn { width: 60px; height: 60px; }
 #stage.short .fab { width: 48px; height: 48px; }
@@ -330,6 +333,10 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
           </button>
         </div>
         <div class="map-br">
+          <button class="fab" id="voiceBtn" aria-label="Indicazioni vocali">
+            <svg id="icoVoiceOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+            <svg id="icoVoiceOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><line x1="16" y1="9" x2="22" y2="15"/><line x1="22" y1="9" x2="16" y2="15"/></svg>
+          </button>
           <button class="fab" id="recenter" aria-label="Centra sulla mia posizione">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3 3 10.5l7.5 3 3 7.5z"/></svg>
           </button>
@@ -341,20 +348,19 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 
       <!-- RADIO -->
       <section class="panel" id="pRadio" aria-label="Radio">
-        <div class="station">
-          <div class="station-logo">RADIO<br>DEEJAY</div>
-          <div>
-            <h2>Radio Deejay</h2>
-            <div class="status" id="radioStatus"><i></i><span>Pronta</span></div>
-          </div>
-        </div>
+        <div class="st-logo" id="stLogo"></div>
+        <div class="st-meta"><b id="stName"></b><span class="status" id="radioStatus"><i></i><span>Pronta</span></span></div>
         <div class="radio-ctrl">
-        <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-        <button class="play" id="play" aria-label="Play">
-          <svg id="icoPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.7l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>
-          <svg id="icoPause" viewBox="0 0 24 24" fill="currentColor" hidden><rect x="6" y="4" width="4.5" height="16" rx="1.2"/><rect x="13.5" y="4" width="4.5" height="16" rx="1.2"/></svg>
-        </button>
-        <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <button class="rbtn" id="prevSt" aria-label="Stazione precedente">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2.2v14H6zM20 5.6v12.8a.8.8 0 0 1-1.2.7L9.6 12.7a.8.8 0 0 1 0-1.4l9.2-6.4a.8.8 0 0 1 1.2.7z"/></svg>
+          </button>
+          <button class="play" id="play" aria-label="Play">
+            <svg id="icoPlay" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.7l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>
+            <svg id="icoPause" viewBox="0 0 24 24" fill="currentColor" hidden><rect x="6" y="4" width="4.5" height="16" rx="1.2"/><rect x="13.5" y="4" width="4.5" height="16" rx="1.2"/></svg>
+          </button>
+          <button class="rbtn" id="nextSt" aria-label="Stazione successiva">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.8 5H18v14h-2.2zM4 5.6v12.8a.8.8 0 0 0 1.2.7l9.2-6.4a.8.8 0 0 0 0-1.4L5.2 4.9a.8.8 0 0 0-1.2.7z"/></svg>
+          </button>
         </div>
         <audio id="audio" preload="none" playsinline></audio>
       </section>
@@ -444,15 +450,23 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
         </label>
         <label class="check" for="sFollow"><input type="checkbox" id="sFollow"> La mappa segue la mia posizione</label>
         <label class="check" for="sVoice"><input type="checkbox" id="sVoice"> Indicazioni vocali durante la navigazione</label>
-        <label class="check" for="sAutoplay"><input type="checkbox" id="sAutoplay"> Avvia la radio quando premo «Avvia»</label>
+        <label class="check" for="sAutoplay"><input type="checkbox" id="sAutoplay"> Avvia la radio al primo tocco</label>
       </fieldset>
 
       <fieldset>
-        <legend>Radio</legend>
-        <label for="sStream">Indirizzo dello stream (HLS .m3u8 o MP3)
-          <input type="url" id="sStream">
+        <legend>Stazioni radio</legend>
+        <div id="sStations" style="display:flex;flex-direction:column;gap:14px"></div>
+        <button type="button" class="btn" id="addStation">+ Aggiungi stazione</button>
+        <p class="note">Per ogni stazione servono il nome e l'indirizzo dello stream (.m3u8, .mp3 o .aac): lo trovi su <b>radio-browser.info</b> cercando il nome della radio. Il logo lo carichi dalle Foto, come quelli dello scooter. Con ◀ ▶ passi da una stazione all'altra.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Traffico in tempo reale</legend>
+        <label class="check" for="sTraffic"><input type="checkbox" id="sTraffic"> Mostra code e rallentamenti sulla mappa</label>
+        <label for="sTomtom">Chiave TomTom
+          <input type="text" id="sTomtom" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla qui la tua chiave API">
         </label>
-        <p class="note">Se Radio Deejay cambia indirizzo e la radio non parte, incolla qui quello nuovo.</p>
+        <p class="note">Il traffico arriva da TomTom, gratis per uso personale. Crea un account su <b>developer.tomtom.com</b>, apri «API Keys», copia la chiave e incollala qui. Con la chiave anche l'orario di arrivo tiene conto del traffico.</p>
       </fieldset>
 
       <button type="button" class="btn" data-close>Chiudi senza salvare</button>
@@ -475,7 +489,9 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   const DEFAULTS = {
     vehicle: 'C 400 GT', brandLogo: '', modelLogo: '',
     rotate: 'r', follow: true, autoplay: false, voice: true,
-    stream: STREAMS[0], home: '', work: '',
+    stations: [{ name: 'Radio Deejay', url: STREAMS[0], logo: '' }], stationIdx: 0,
+    traffic: true, tomtomKey: '',
+    home: '', work: '',
     contacts: [
       { name: '', phone: '', shortcut: '', mode: 'wa' },
       { name: '', phone: '', shortcut: '', mode: 'wa' },
@@ -484,7 +500,12 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   };
   const KEY = 'cockpit.v1';
   const load = () => {
-    try { const s = JSON.parse(localStorage.getItem(KEY) || '{}'); return { ...DEFAULTS, ...s, contacts: (s.contacts || DEFAULTS.contacts).slice(0, 3) }; }
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY) || '{}');
+      const c = { ...structuredClone(DEFAULTS), ...s, contacts: (s.contacts || structuredClone(DEFAULTS.contacts)).slice(0, 3) };
+      if (!s.stations && s.stream) c.stations = [{ name: 'Radio Deejay', url: s.stream, logo: '' }]; // vecchie impostazioni
+      return c;
+    }
     catch { return structuredClone(DEFAULTS); }
   };
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch { /* spazio pieno o storage bloccato */ } };
@@ -564,6 +585,9 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       subdomains: 'abcd', maxZoom: 20, attribution: '© OpenStreetMap © CARTO'
     }).addTo(map);
     map.attributionControl.setPrefix(false);
+    map.createPane('traffic');
+    map.getPane('traffic').style.zIndex = 450;
+    map.getPane('traffic').style.pointerEvents = 'none';
     routeCasing = L.polyline([], { color: '#ffffff', weight: 11, opacity: .95, interactive: false }).addTo(map);
     routeLine = L.polyline([], { color: '#1a73e8', weight: 7, opacity: 1, interactive: false }).addTo(map);
     map.on('dragstart', () => { followPauseUntil = Date.now() + 15000; });
@@ -599,13 +623,60 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     $('#map').innerHTML = '<div class="map-msg">Mappa non disponibile: controlla la connessione e riapri l\'app.</div>';
   }
 
+  // ---------- Traffico (TomTom): solo code e rallentamenti, come Google ----------
+  let trafficLayer = null;
+  function applyTraffic() {
+    if (!map) return;
+    if (trafficLayer) { trafficLayer.remove(); trafficLayer = null; }
+    if (cfg.traffic === false || !cfg.tomtomKey) return;
+    const key = encodeURIComponent(cfg.tomtomKey);
+    const Traffic = L.GridLayer.extend({
+      createTile(c, done) {
+        const tile = document.createElement('canvas');
+        const size = this.getTileSize();
+        tile.width = size.x; tile.height = size.y;
+        const ctx = tile.getContext('2d');
+        const url = `https://api.tomtom.com/traffic/map/4/tile/flow/relative0/${c.z}/${c.x}/${c.y}.png?key=${key}&tileSize=256&thickness=7`;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, size.x, size.y);
+          try {
+            const d = ctx.getImageData(0, 0, size.x, size.y), px = d.data;
+            for (let i = 0; i < px.length; i += 4) {
+              const r = px[i], g = px[i + 1], b = px[i + 2];
+              if (g > r * 1.15 && g > b * 1.15) px[i + 3] = 0; // via il verde (traffico scorrevole)
+            }
+            ctx.putImageData(d, 0, 0);
+          } catch { /* immagine non elaborabile: la mostriamo intera */ }
+          done(null, tile);
+        };
+        img.onerror = () => {
+          // Senza permesso CORS: mostriamo la tile originale, verde compreso
+          const plain = new Image();
+          plain.onload = () => { ctx.drawImage(plain, 0, 0, size.x, size.y); done(null, tile); };
+          plain.onerror = () => done(null, tile);
+          plain.src = url;
+        };
+        img.src = url;
+        return tile;
+      }
+    });
+    trafficLayer = new Traffic({ pane: 'traffic', tileSize: 256, maxZoom: 20, maxNativeZoom: 20, opacity: .9, attribution: 'Traffico © TomTom', updateWhenIdle: true }).addTo(map);
+  }
+  setInterval(() => { if (trafficLayer && document.visibilityState === 'visible') trafficLayer.redraw(); }, 180000);
+
+  // ---------- Freccia della mia posizione ----------
+  let rot = 0;
   const placeMe = () => {
     if (!map || !pos || pos.stale) return;
     if (!meMarker) {
-      meMarker = L.marker([pos.lat, pos.lng], { interactive: false, zIndexOffset: 1000, icon: L.divIcon({ className: '', html: '<div class="me-dot"><div class="me-arrow"></div></div>', iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(map);
+      meMarker = L.marker([pos.lat, pos.lng], { interactive: false, zIndexOffset: 1000, icon: L.divIcon({ className: '', iconSize: [44, 44], iconAnchor: [22, 22],
+        html: '<div class="me-nav"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="rgba(26,115,232,.16)"/><path d="M22 5 34.5 35 22 28.5 9.5 35Z" fill="#1a73e8" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg></div>' }) }).addTo(map);
     } else meMarker.setLatLng([pos.lat, pos.lng]);
-    const arrow = meMarker.getElement()?.querySelector('.me-arrow');
-    if (arrow) { arrow.style.visibility = heading == null ? 'hidden' : 'visible'; arrow.style.transform = `rotate(${heading || 0}deg)`; }
+    if (heading != null) rot += ((heading - rot) % 360 + 540) % 360 - 180; // gira dal lato più corto
+    const el = meMarker.getElement()?.querySelector('.me-nav');
+    if (el) el.style.transform = `rotate(${rot}deg)`;
   };
   const followZoom = () => (kmhNow > 70 ? 15 : kmhNow > 35 ? 16 : 17);
   const follow = (force = false) => {
@@ -645,10 +716,23 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
         const pts = decode(leg.shape);
         const cum = [0];
         for (let k = 1; k < pts.length; k++) cum.push(cum[k - 1] + dist({ lat: pts[k - 1][0], lng: pts[k - 1][1] }, { lat: pts[k][0], lng: pts[k][1] }));
-        return { pts, cum, total: cum[cum.length - 1], time: j.trip.summary.time, maneuvers: leg.maneuvers };
+        const route = { pts, cum, total: cum[cum.length - 1], time: j.trip.summary.time, delay: 0, maneuvers: leg.maneuvers };
+        const tr = await trafficEta(from, to);
+        if (tr) { route.time = tr.time; route.delay = tr.delay; }
+        return route;
       } catch (e) { lastErr = e; }
     }
     throw lastErr;
+  };
+
+  const trafficEta = async (from, to) => {
+    if (!cfg.tomtomKey || cfg.traffic === false) return null;
+    try {
+      const r = await fetch(`https://api.tomtom.com/routing/1/calculateRoute/${from.lat},${from.lng}:${to.lat},${to.lng}/json?key=${encodeURIComponent(cfg.tomtomKey)}&traffic=true&travelMode=motorcycle&routeType=fastest`);
+      if (!r.ok) return null;
+      const sm = (await r.json()).routes[0].summary;
+      return { time: sm.travelTimeInSeconds, delay: sm.trafficDelayInSeconds || 0 };
+    } catch { return null; }
   };
 
   // ---------- Formattazione ----------
@@ -670,6 +754,17 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     } catch { /* sintesi vocale non disponibile */ }
   };
   const lc = t => t ? t.charAt(0).toLowerCase() + t.slice(1) : '';
+  function renderVoice() {
+    const on = cfg.voice !== false;
+    $('#icoVoiceOn').hidden = !on; $('#icoVoiceOff').hidden = on;
+    $('#voiceBtn').classList.toggle('muted', !on);
+    $('#voiceBtn').setAttribute('aria-label', on ? 'Disattiva indicazioni vocali' : 'Attiva indicazioni vocali');
+  }
+  $('#voiceBtn').addEventListener('click', () => {
+    cfg.voice = cfg.voice === false; save(); renderVoice();
+    if (cfg.voice) say('Indicazioni vocali attive');
+    else { try { speechSynthesis.cancel(); } catch { /* niente da fermare */ } }
+  });
 
   // ---------- Icone manovra ----------
   const ANGLE = { 1: 0, 7: 0, 8: 0, 17: 0, 22: 0, 25: 0, 9: 45, 18: 45, 20: 45, 23: 30, 37: 30, 2: 90, 10: 90, 11: 135, 12: 180, 13: 180, 14: -135, 3: -90, 15: -90, 16: -45, 19: -45, 21: -45, 24: -30, 38: -30 };
@@ -714,7 +809,8 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       preview.route = route;
       drawRoute(route);
       if (map) map.fitBounds(routeLine.getBounds(), { padding: [70, 40] });
-      showPill(place.name, `${fmtDist(route.total)} · ${fmtDur(route.time)} · arrivo ${fmtClock(new Date(Date.now() + route.time * 1000))}`, true);
+      const delay = route.delay > 60 ? ` (+${fmtDur(route.delay)} traffico)` : '';
+      showPill(place.name, `${fmtDist(route.total)} · ${fmtDur(route.time)}${delay} · arrivo ${fmtClock(new Date(Date.now() + route.time * 1000))}`, true);
     } catch {
       if (preview && preview.place === place) showPill(place.name, 'Percorso non disponibile: controlla la connessione e riprova', false);
     }
@@ -830,19 +926,36 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   const audio = $('#audio');
   const status = $('#radioStatus');
   let streamIdx = 0, wantPlay = false;
-  const streamList = () => [cfg.stream, ...STREAMS.filter(s => s !== cfg.stream)].filter(Boolean);
+  const stations = () => (cfg.stations && cfg.stations.length ? cfg.stations : [{ name: 'Radio Deejay', url: STREAMS[0], logo: '' }]);
+  const curStation = () => {
+    const list = stations();
+    cfg.stationIdx = Math.min(Math.max(0, cfg.stationIdx || 0), list.length - 1);
+    return list[cfg.stationIdx];
+  };
+  // Per Radio Deejay proviamo anche i server di riserva
+  const streamList = () => { const u = curStation().url; return /radiodeejay/i.test(u) ? [u, ...STREAMS.filter(x => x !== u)] : [u]; };
   const setStatus = (txt, live = false) => { status.querySelector('span').textContent = txt; status.classList.toggle('live', live); };
   const setPlayingUI = on => {
     $('#pRadio').classList.toggle('playing', on);
     $('#icoPlay').hidden = on; $('#icoPause').hidden = !on;
     $('#play').setAttribute('aria-label', on ? 'Pausa' : 'Play');
   };
+  function renderStation() {
+    const st = curStation();
+    $('#stLogo').innerHTML = st.logo ? `<img src="${st.logo}" alt="${esc(st.name)}">` : `<span>${esc(st.name)}</span>`;
+    $('#stName').textContent = st.name;
+    const many = stations().length > 1;
+    $('#prevSt').disabled = !many; $('#nextSt').disabled = !many;
+    if ('mediaSession' in navigator) {
+      try { navigator.mediaSession.metadata = new MediaMetadata({ title: st.name, artist: 'In diretta', artwork: st.logo ? [{ src: st.logo, sizes: '240x240', type: 'image/png' }] : [] }); } catch { /* metadati non supportati */ }
+    }
+  }
   const playRadio = () => {
     wantPlay = true;
     const list = streamList();
     if (!audio.src || !list.includes(audio.src)) { streamIdx = 0; audio.src = list[0]; }
     setStatus('Connessione…');
-    audio.play().catch(() => setStatus('Tocca play per avviare'));
+    audio.play().catch(() => setStatus('Tocca play'));
   };
   const stopRadio = () => {
     wantPlay = false;
@@ -850,7 +963,18 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     audio.removeAttribute('src'); audio.load(); // in diretta: alla ripresa riparte dal live
     setPlayingUI(false); setStatus('In pausa');
   };
+  const switchStation = delta => {
+    const n = stations().length;
+    if (n < 2) return;
+    const was = wantPlay;
+    if (was) stopRadio();
+    cfg.stationIdx = ((cfg.stationIdx || 0) + delta + n) % n;
+    save(); renderStation();
+    if (was) playRadio(); else setStatus('Pronta');
+  };
   $('#play').addEventListener('click', () => (wantPlay ? stopRadio() : playRadio()));
+  $('#prevSt').addEventListener('click', () => switchStation(-1));
+  $('#nextSt').addEventListener('click', () => switchStation(1));
   audio.addEventListener('playing', () => { setPlayingUI(true); setStatus('In diretta', true); });
   audio.addEventListener('waiting', () => wantPlay && setStatus('Caricamento…'));
   audio.addEventListener('pause', () => { if (!wantPlay) setPlayingUI(false); });
@@ -858,13 +982,13 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     if (!wantPlay) return;
     const list = streamList();
     streamIdx++;
-    if (streamIdx < list.length) { audio.src = list[streamIdx]; audio.play().catch(() => {}); setStatus('Provo un altro server…'); }
-    else { wantPlay = false; setPlayingUI(false); setStatus('Stream non raggiungibile: controlla l\'indirizzo nelle impostazioni'); }
+    if (streamIdx < list.length) { audio.src = list[streamIdx]; audio.play().catch(() => {}); setStatus('Altro server…'); }
+    else { wantPlay = false; setPlayingUI(false); setStatus('Non raggiungibile'); }
   });
   if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: 'Radio Deejay', artist: 'In diretta' });
-    navigator.mediaSession.setActionHandler('play', playRadio);
-    navigator.mediaSession.setActionHandler('pause', stopRadio);
+    const h = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch { /* azione non supportata */ } };
+    h('play', playRadio); h('pause', stopRadio);
+    h('nexttrack', () => switchStation(1)); h('previoustrack', () => switchStation(-1));
   }
 
   // ---------- Contatti ----------
@@ -1009,7 +1133,10 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     $('#sFollow').checked = draft.follow;
     $('#sAutoplay').checked = draft.autoplay;
     $('#sVoice').checked = draft.voice !== false;
-    $('#sStream').value = draft.stream;
+    $('#sTraffic').checked = draft.traffic !== false;
+    $('#sTomtom').value = draft.tomtomKey || '';
+    draft.stations = structuredClone(stations());
+    fillStations();
     fillContactsForm(); showLogoPrev();
     settingsSheet.hidden = false; settingsSheet.scrollTop = 0; layout();
   }
@@ -1018,11 +1145,11 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   $$('[data-close]').forEach(b => b.addEventListener('click', closeSheets));
 
   // Ridimensiona il logo a max 360px per non riempire la memoria del browser
-  const readLogo = (file, cb) => {
+  const readLogo = (file, cb, max = 360) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      const s = Math.min(1, 360 / Math.max(img.width, img.height));
+      const s = Math.min(1, max / Math.max(img.width, img.height));
       const c = document.createElement('canvas');
       c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
@@ -1035,6 +1162,34 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   $('#sModelLogo').addEventListener('change', e => e.target.files[0] && readLogo(e.target.files[0], d => { draft.modelLogo = d; showLogoPrev(); }));
   $$('[data-clear-logo]').forEach(b => b.addEventListener('click', () => { draft[b.dataset.clearLogo] = ''; showLogoPrev(); }));
 
+  // Stazioni radio nelle impostazioni
+  function readStationsForm() {
+    draft.stations = draft.stations.map((st, i) => ({ ...st, name: ($('#stN' + i)?.value ?? st.name).trim(), url: ($('#stU' + i)?.value ?? st.url).trim() }));
+  }
+  function fillStations() {
+    const box = $('#sStations');
+    box.innerHTML = draft.stations.map((st, i) => `
+      <div class="contact-edit">
+        <h3>Stazione ${i + 1}${draft.stations.length > 1 ? `<button type="button" class="pick" data-rm-st="${i}">Rimuovi</button>` : ''}</h3>
+        <div class="row">
+          <label for="stN${i}">Nome<input type="text" id="stN${i}" value="${esc(st.name)}" placeholder="Es. Radio Deejay"></label>
+          <label for="stU${i}">Indirizzo stream<input type="url" id="stU${i}" value="${esc(st.url)}" placeholder="https://…" autocapitalize="off" spellcheck="false"></label>
+        </div>
+        <div class="logo-slot">
+          <div class="logo-prev" style="background-color:#fff;background-image:${st.logo ? `url('${st.logo}')` : 'none'}"></div>
+          <label for="stL${i}" style="flex:1">Logo della stazione<input type="file" id="stL${i}" accept="image/*" data-st-logo="${i}"></label>
+          ${st.logo ? `<button type="button" class="btn" data-st-clear="${i}">Rimuovi logo</button>` : ''}
+        </div>
+      </div>`).join('');
+    $$('[data-rm-st]', box).forEach(b => b.addEventListener('click', () => { readStationsForm(); draft.stations.splice(+b.dataset.rmSt, 1); fillStations(); }));
+    $$('[data-st-clear]', box).forEach(b => b.addEventListener('click', () => { readStationsForm(); draft.stations[+b.dataset.stClear].logo = ''; fillStations(); }));
+    $$('[data-st-logo]', box).forEach(inp => inp.addEventListener('change', e => {
+      const f = e.target.files[0]; if (!f) return;
+      readLogo(f, d => { readStationsForm(); draft.stations[+inp.dataset.stLogo].logo = d; fillStations(); }, 240);
+    }));
+  }
+  $('#addStation').addEventListener('click', () => { readStationsForm(); draft.stations.push({ name: '', url: '', logo: '' }); fillStations(); setTimeout(() => $('#stN' + (draft.stations.length - 1))?.focus(), 50); });
+
   $('#settingsForm').addEventListener('submit', e => {
     e.preventDefault();
     draft.vehicle = $('#sVehicle').value.trim();
@@ -1044,12 +1199,18 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     draft.follow = $('#sFollow').checked;
     draft.autoplay = $('#sAutoplay').checked;
     draft.voice = $('#sVoice').checked;
-    draft.stream = $('#sStream').value.trim() || STREAMS[0];
+    draft.traffic = $('#sTraffic').checked;
+    draft.tomtomKey = $('#sTomtom').value.trim();
+    readStationsForm();
+    draft.stations = draft.stations.filter(st => st.url).map(st => ({ ...st, name: st.name || 'Radio' }));
+    if (!draft.stations.length) draft.stations = [{ name: 'Radio Deejay', url: STREAMS[0], logo: '' }];
     draft.contacts = draft.contacts.map((_, i) => ({
       name: $('#cN' + i).value.trim(), phone: $('#cP' + i).value.trim(), shortcut: $('#cS' + i).value.trim(), mode: $('#cM' + i).value
     }));
+    const prevUrl = curStation().url;
     cfg = draft; save();
-    renderBrand(); renderContacts();
+    renderBrand(); renderContacts(); renderStation(); renderVoice(); applyTraffic();
+    if (wantPlay && curStation().url !== prevUrl) { stopRadio(); playRadio(); }
     closeSheets();
   });
 
@@ -1081,7 +1242,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   };
   document.addEventListener('pointerdown', firstTouch, { once: true, capture: true });
 
-  renderBrand(); renderContacts(); layout();
+  renderBrand(); renderContacts(); renderStation(); renderVoice(); applyTraffic(); layout();
 })();
 </script>
 </body>
