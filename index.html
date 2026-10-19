@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v84">
+<meta name="cockpit-version" content="2026-10-19 v85">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -255,7 +255,35 @@ main {
 .st-logo span { font-weight: 900; font-size: 14px; line-height: 1.05; text-align: center; padding: 6px; text-transform: uppercase; letter-spacing: -.3px; word-break: break-word; }
 .st-logo::after { content: ""; position: absolute; top: 7px; right: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--live); border: 2px solid #fff; opacity: 0; }
 .playing .st-logo::after { opacity: 1; animation: pulse 1.6s infinite; }
-#pRadio { touch-action: pan-y; }
+#pRadio { touch-action: none; } /* swipe orizzontale: stazione; verticale: pagina «Casa» */
+/* pagina «Casa»: entra dal basso mentre la radio sale e sfuma */
+#pRadio > .st-logo, #pRadio > .st-meta, #pRadio > .wave { transition: opacity .25s ease, translate .34s cubic-bezier(.2,.8,.2,1); }
+#pRadio.act > .st-logo, #pRadio.act > .st-meta, #pRadio.act > .wave { opacity: 0; translate: 0 -36px; pointer-events: none; }
+.rpage-act { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 12px 28px 12px 12px; opacity: 0; translate: 0 48px; pointer-events: none; transition: opacity .22s ease, translate .34s cubic-bezier(.2,.8,.2,1); }
+#pRadio.act .rpage-act { opacity: 1; translate: none; pointer-events: auto; transition-delay: .06s; }
+.act-btn { width: 84px; height: 84px; border-radius: 24px; display: grid; place-items: center; color: #fff; background: linear-gradient(150deg, #4f7cff, #7a4dff); border: 1.5px solid rgba(190,200,255,.45); box-shadow: inset 0 0 16px rgba(255,255,255,.14), 0 8px 22px rgba(0,0,0,.35); -webkit-tap-highlight-color: transparent; -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none; transition: transform .15s; }
+.act-btn:active { transform: scale(.93); }
+.act-btn svg { width: 42px; height: 42px; }
+.act-txt { text-align: center; min-width: 0; }
+.act-txt b { display: block; font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-txt small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.act-btn.sent { animation: actSent .9s ease; }
+@keyframes actSent { 30% { box-shadow: 0 0 0 10px rgba(122,77,255,.35), 0 8px 22px rgba(0,0,0,.35); } }
+/* puntini verticali a destra: in quale pagina siamo */
+.rdots { position: absolute; z-index: 3; right: 10px; top: 50%; translate: 0 -50%; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
+.rdots i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.3); transition: height .3s, background .3s; }
+.rdots i.on { height: 16px; background: rgba(255,255,255,.9); }
+#pRadio:not(.act) .rdots i:first-child, #pRadio.act .rdots i:last-child { height: 16px; background: rgba(255,255,255,.9); }
+#pRadio:not(.act) .rdots i:last-child, #pRadio.act .rdots i:first-child { height: 6px; background: rgba(255,255,255,.3); }
+/* in verticale il riquadro è basso: pulsante e testo affiancati */
+#stage:not(.land) #app[data-mode="home"] .rpage-act { flex-direction: row; gap: 14px; }
+#stage:not(.land) #app[data-mode="home"] .act-btn { width: 60px; height: 60px; border-radius: 18px; }
+#stage:not(.land) #app[data-mode="home"] .act-btn svg { width: 30px; height: 30px; }
+#stage:not(.land) #app[data-mode="home"] .act-txt { text-align: left; }
+#stage.short #app[data-mode="home"] .act-btn { width: 56px; height: 56px; border-radius: 16px; }
+#app[data-mode="radio"] .act-btn { width: 140px; height: 140px; border-radius: 36px; }
+#app[data-mode="radio"] .act-btn svg { width: 68px; height: 68px; }
+#app[data-mode="radio"] .act-txt b { font-size: 24px; }
 .st-meta { display: flex; align-items: center; gap: 10px; max-width: 100%; min-width: 0; font-size: 14px; }
 .st-meta b { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .status { display: flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
@@ -626,7 +654,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v84</small>
+  <small style="opacity:.6">2026-10-19 v85</small>
 </div>
 <script>
   setTimeout(function () {
@@ -746,6 +774,12 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           </button>
         </div>
         <audio id="audio" preload="none" playsinline></audio>
+        <!-- seconda pagina (swipe in su): pulsante che avvia il comando «Casa» dell'app Comandi -->
+        <div class="rpage-act" id="actPage" aria-hidden="true">
+          <a class="act-btn" id="actBtn" href="#" draggable="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10.5h13V9"/><path d="M9.5 19.5v-5a2.5 2.5 0 0 1 5 0v5"/></svg></a>
+          <div class="act-txt"><b id="actLabel"></b><small id="actSub"></small></div>
+        </div>
+        <div class="rdots" aria-hidden="true"><i class="on"></i><i></i></div>
       </section>
 
       <!-- CONTATTI -->
@@ -785,6 +819,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <button type="button" data-sec="scooter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M8 17h7.5l2-6H20M15 6h2l1 5M8 17l-2-6h6"/></svg>Scooter</button>
           <button type="button" data-sec="contatti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>Contatti</button>
           <button type="button" data-sec="destinazioni"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/></svg>Destinazioni</button>
+          <button type="button" data-sec="casa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10.5h13V9"/><path d="M9.5 19.5v-5a2.5 2.5 0 0 1 5 0v5"/></svg>Casa</button>
           <button type="button" data-sec="radio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>Radio</button>
           <button type="button" data-sec="traffico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="3"/><circle cx="12" cy="7" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="17" r="1.6"/></svg>Traffico</button>
           <button type="button" data-sec="mappa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>Mappa e voce</button>
@@ -837,6 +872,16 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
               <div class="item"><label for="sWork">Lavoro</label><input type="text" id="sWork" placeholder="Indirizzo del lavoro"></div>
             </div>
             <p class="foot">Compaiono come pulsanti nella ricerca della destinazione.</p>
+          </section>
+
+          <!-- CASA -->
+          <section class="set-sec" data-sec="casa">
+            <h2>Pulsante Casa</h2>
+            <div class="group">
+              <div class="item"><label for="sActName">Nome del comando (app Comandi)</label><input type="text" id="sActName" autocomplete="off" placeholder="Es. Cockpit Casa"></div>
+              <div class="item"><label for="sActLabel">Scritta sul pulsante</label><input type="text" id="sActLabel" autocomplete="off" placeholder="Es. Arrivo a casa"></div>
+            </div>
+            <p class="foot">Nel riquadro della radio scorri in su: compare il pulsante che avvia questo comando dell'app Comandi (per esempio: disattiva l'allarme Ring e fa partire una routine Alexa). Il nome deve essere scritto esattamente come in Comandi. Scorri in giù per tornare alla radio.</p>
           </section>
 
           <!-- RADIO -->
@@ -931,7 +976,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v84</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v85</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -1067,6 +1112,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     stations: [{ name: 'Radio Deejay', url: STREAMS[0], logo: '', site: 'deejay.it' }], stationIdx: 0,
     traffic: true, tomtomKey: '',
     home: '', work: '',
+    actName: 'Cockpit Casa', actLabel: 'Arrivo a casa',
     contacts: [
       { name: '', phone: '', shortcut: '', mode: 'wa' },
       { name: '', phone: '', shortcut: '', mode: 'wa' },
@@ -2246,17 +2292,29 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   // swipe a destra o a sinistra sul riquadro della radio: stazione precedente o successiva
   {
     const box = $('#pRadio');
-    let sx = 0, sy = 0, dx = 0, drag = false, id = null, t0 = 0;
-    box.addEventListener('pointerdown', e => { id = e.pointerId; sx = e.clientX; sy = e.clientY; dx = 0; drag = false; t0 = performance.now(); });
+    let sx = 0, sy = 0, dx = 0, dy = 0, drag = false, vdrag = false, id = null, t0 = 0;
+    box.addEventListener('pointerdown', e => { id = e.pointerId; sx = e.clientX; sy = e.clientY; dx = dy = 0; drag = vdrag = false; t0 = performance.now(); });
     box.addEventListener('pointermove', e => {
       if (e.pointerId !== id) return;
-      dx = e.clientX - sx;
-      if (!drag && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(e.clientY - sy) * 1.2 && stations().length > 1) { drag = true; box.setPointerCapture?.(id); }
+      dx = e.clientX - sx; dy = e.clientY - sy;
+      // in verticale: pagina radio ↔ pagina «Casa»
+      if (!drag && !vdrag && Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx) * 1.2) { vdrag = true; box.setPointerCapture?.(id); }
+      if (vdrag) return;
+      if (!drag && !box.classList.contains('act') && Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(e.clientY - sy) * 1.2 && stations().length > 1) { drag = true; box.setPointerCapture?.(id); }
       if (drag) stFx().forEach(el => { el.getAnimations().forEach(a => a.cancel()); el.style.transform = `translateX(${dx}px)`; el.style.opacity = String(Math.max(.2, 1 - Math.abs(dx) / 200)); });
     });
     const end = e => {
       if (e.pointerId !== id) return;
       id = null;
+      if (vdrag) {
+        const fast = Math.abs(dy) / Math.max(1, performance.now() - t0) > .4;
+        if (dy < -40 || (fast && dy < -20)) showAct(true);
+        else if (dy > 40 || (fast && dy > 20)) showAct(false);
+        const block = ev => { ev.stopPropagation(); ev.preventDefault(); };
+        box.addEventListener('click', block, { capture: true, once: true });
+        setTimeout(() => box.removeEventListener('click', block, { capture: true }), 350);
+        return;
+      }
       if (!drag) return;
       const fast = Math.abs(dx) / Math.max(1, performance.now() - t0) > .4;
       stFx().forEach(el => { el.style.transform = ''; el.style.opacity = ''; });
@@ -2269,6 +2327,28 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     };
     box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
   }
+  // ---------- Pagina «Casa» nel riquadro radio: un pulsante che avvia un comando dell'app Comandi ----------
+  let actTimer = 0;
+  function showAct(on) {
+    $('#pRadio').classList.toggle('act', on);
+    $('#actPage').setAttribute('aria-hidden', String(!on));
+    clearTimeout(actTimer);
+    if (on) actTimer = setTimeout(() => showAct(false), 20000); // senza tocchi torna da sola alla radio
+  }
+  function renderAct() {
+    const name = (cfg.actName || '').trim();
+    $('#actLabel').textContent = cfg.actLabel || 'Casa';
+    $('#actSub').textContent = name ? 'Avvia «' + name + '»' : 'Scegli il comando nelle impostazioni';
+    $('#actBtn').href = name ? 'shortcuts://run-shortcut?name=' + encodeURIComponent(name) : '#';
+    $('#actBtn').setAttribute('aria-label', (cfg.actLabel || 'Casa') + (name ? ': avvia il comando ' + name : ''));
+  }
+  $('#actBtn').addEventListener('click', e => {
+    if (!(cfg.actName || '').trim()) { e.preventDefault(); openSettings(); showSec('casa'); return; }
+    diag('casa: avvio comando «' + cfg.actName + '»');
+    const b = $('#actBtn'); b.classList.remove('sent'); void b.offsetWidth; b.classList.add('sent');
+    clearTimeout(actTimer); actTimer = setTimeout(() => showAct(false), 2500);
+  });
+  $('#actPage').addEventListener('pointerdown', () => { if ($('#pRadio').classList.contains('act')) { clearTimeout(actTimer); actTimer = setTimeout(() => showAct(false), 20000); } });
   // play / pausa: guardiamo anche se l'audio sta suonando davvero; un secondo tocco entro 0,4 s viene ignorato
   let lastToggle = 0;
   const toggleRadio = () => {
@@ -2664,6 +2744,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   function openSettings() {
     draft = structuredClone(cfg);
     $('#sVehicle').value = draft.vehicle;
+    $('#sActName').value = draft.actName || '';
+    $('#sActLabel').value = draft.actLabel || '';
     $('#sHome').value = draft.home;
     $('#sWork').value = draft.work;
     $('#sFollow').checked = draft.follow;
@@ -2800,6 +2882,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     draft.traffic = $('#sTraffic').checked;
     draft.trafficGreen = $('#sTrafficGreen').checked;
     draft.tomtomKey = tomtomKeyFrom($('#sTomtom').value);
+    draft.actName = $('#sActName').value.trim();
+    draft.actLabel = $('#sActLabel').value.trim();
     delete draft.tomtomKeyMapFail;
     if (draft.tomtomKey !== cfg.tomtomKey) delete draft.trafficEp;
     readStationsForm();
@@ -2809,7 +2893,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     draft.contacts = draft.contacts.filter(c => c.name || c.phone || c.shortcut); // i contatti lasciati vuoti non si salvano
     const prevUrl = curStation().url;
     cfg = draft; save(); layout();
-    renderBrand(); renderContacts(); renderStation(); renderVoice(); applyTraffic(); applyDesign(); if (nav.active) follow(true);
+    renderBrand(); renderContacts(); renderStation(); renderAct(); renderVoice(); applyTraffic(); applyDesign(); if (nav.active) follow(true);
     if (wantPlay && curStation().url !== prevUrl) { stopRadio(); playRadio(); }
     closeSheets();
   });
@@ -2836,7 +2920,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     try {
       const data = JSON.parse(m[1]);
       cfg = { ...structuredClone(DEFAULTS), ...data };
-      save(); renderBrand(); renderContacts(); renderStation(); renderVoice(); applyTraffic(); applyDesign(); layout();
+      save(); renderBrand(); renderContacts(); renderStation(); renderAct(); renderVoice(); applyTraffic(); applyDesign(); layout();
       cfgMsg('✓ Impostazioni ripristinate: contatti, chiave TomTom, stazioni e loghi.', true);
       setTimeout(() => { closeSheets(); }, 1200);
     } catch { cfgMsg('Il testo incollato è incompleto: ricopialo e riprova.', false); }
@@ -2900,7 +2984,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   };
   document.addEventListener('pointerdown', firstTouch, { once: true, capture: true });
 
-  applyDesign(); renderBrand(); renderContacts(); renderStation(); renderVoice(); applyTraffic(); layout();
+  applyDesign(); renderBrand(); renderContacts(); renderStation(); renderAct(); renderVoice(); applyTraffic(); layout();
   renderWeather(); renderCalendar(); showPage(cPage, false);
   document.getElementById('boot')?.remove();
 
