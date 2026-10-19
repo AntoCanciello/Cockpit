@@ -59,7 +59,7 @@ svg { display: block; }
 
 /* Barra laterale */
 .rail {
-  flex: 0 0 auto; width: 92px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  flex: 0 0 auto; width: 92px; display: flex; flex-direction: column; align-items: center; gap: 8px; overflow: hidden;
   background: var(--panel); border: 1px solid var(--line); border-radius: 28px; padding: 12px 8px;
 }
 .brand { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: var(--panel-2); flex: 0 0 auto; }
@@ -69,7 +69,7 @@ svg { display: block; }
 .gps i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .gps.on i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
 .rail nav { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 6px; width: 100%; }
-.nav-btn { width: 100%; flex: 1 1 0; min-height: 40px; max-height: 62px; border-radius: 18px; display: grid; place-items: center; color: var(--muted); transition: background .15s, color .15s; }
+.nav-btn { width: 100%; flex: 1 1 0; min-height: 0; max-height: 62px; border-radius: 18px; display: grid; place-items: center; color: var(--muted); transition: background .15s, color .15s; }
 .nav-btn svg { width: 28px; height: 28px; }
 .nav-btn.settings { margin-top: 6px; }
 .nav-btn[aria-current="true"] { background: var(--accent); color: var(--accent-ink); }
@@ -194,6 +194,35 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip { height: 52px; padding: 0 20px; border-radius: 26px; background: var(--panel-2); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
 .chip svg { width: 20px; height: 20px; color: var(--accent); }
+
+/* ---------- Schermi bassi (Safari con le barre, iPhone mini) ---------- */
+#stage.short .rail { width: 80px; padding: 8px 6px; gap: 4px; }
+#stage.short .brand { width: 38px; height: 38px; }
+#stage.short .brand svg { width: 24px; height: 24px; }
+#stage.short .clock { font-size: 16px; }
+#stage.short .gps { font-size: 9px; margin-top: -2px; }
+#stage.short .rail nav { gap: 4px; }
+#stage.short .nav-btn { border-radius: 14px; }
+#stage.short .nav-btn svg { width: 24px; height: 24px; }
+#stage.short #app[data-mode="home"] #pRadio { flex-direction: row; justify-content: space-between; gap: 12px; padding: 10px 14px; }
+#stage.short #app[data-mode="home"] .radio-ctrl .eq { display: none; }
+#stage.short #app[data-mode="home"] .play { width: 60px; height: 60px; }
+#stage.short #app[data-mode="home"] .play svg { width: 26px; height: 26px; }
+#stage.short #app[data-mode="home"] .station { gap: 10px; }
+#stage.short #app[data-mode="home"] .station-logo { width: 46px; height: 46px; font-size: 11px; border-radius: 13px; }
+#stage.short #app[data-mode="home"] .station h2 { font-size: 18px; }
+#stage.short #app[data-mode="home"] #pContacts { padding: 8px; gap: 6px; }
+#stage.short #app[data-mode="home"] .contact { padding: 3px 3px 3px 8px; gap: 8px; border-radius: 12px; }
+#stage.short #app[data-mode="home"] .avatar { width: 30px; height: 30px; font-size: 13px; }
+#stage.short #app[data-mode="home"] .contact .name { font-size: 15px; }
+#stage.short #app[data-mode="home"] .cbtn { width: 36px; height: 36px; border-radius: 11px; }
+#stage.short #app[data-mode="home"] .cbtn svg { width: 20px; height: 20px; }
+#stage.short #app[data-mode="radio"] .play { width: 96px; height: 96px; }
+#stage.short #app[data-mode="radio"] #pRadio { gap: 18px; }
+#stage.short #app[data-mode="contacts"] .avatar { width: 48px; height: 48px; font-size: 19px; }
+#stage.short #app[data-mode="contacts"] .cbtn { width: 60px; height: 60px; }
+#stage.short .fab { width: 48px; height: 48px; }
+#stage.short .speed b { font-size: 32px; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
@@ -412,6 +441,7 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
     stage.classList.toggle('rot-r', rotate && cfg.rotate === 'r');
     stage.classList.toggle('rot-l', rotate && cfg.rotate === 'l');
     stage.classList.toggle('norot', !rotate);
+    stage.classList.toggle('short', (rotate ? w : h) < 440);
     if (rotate) {
       stage.style.width = h + 'px';
       stage.style.height = w + 'px';
