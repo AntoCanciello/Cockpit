@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v74">
+<meta name="cockpit-version" content="2026-10-19 v75">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -609,7 +609,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v74</small>
+  <small style="opacity:.6">2026-10-19 v75</small>
 </div>
 <script>
   setTimeout(function () {
@@ -914,7 +914,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v74</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v75</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -1014,8 +1014,18 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   // Radio italiane già pronte (se un indirizzo smette di funzionare, l'app cerca quello nuovo su radio-browser.info)
   const RADIO_IT = [
     { name: 'Radio Deejay', url: STREAMS[0], site: 'deejay.it' },
-    { name: 'Sky TG24', url: 'https://skyitalia-live.akamaized.net/hls/live/2036961/skytg24radio/master.m3u8', site: 'tg24.sky.it' },
-    { name: 'Radio Kiss Kiss Napoli', url: 'https://ice07.fluidstream.net/KissKissNapoli.mp3', site: 'kisskissnapoli.it' },
+    // Sky TG24 non ha uno stream solo audio: è l'audio del canale TV (scarica anche il video)
+    { name: 'Sky TG24', url: 'https://skyanywhere3-i.akamaihd.net/hls/live/510696/tg24/playlist.m3u8', site: 'tg24.sky.it', alt: ['https://skyianywhere2-i.akamaihd.net/hls/live/200275/tg24/playlist.m3u8'] },
+    // il sito di Kiss Kiss Napoli ha come icona un ingranaggio generico: il logo arriva dagli archivi delle radio
+    { name: 'Radio Kiss Kiss Napoli', url: 'https://kisskiss.fluidstream.eu/KKNapoli.aac', site: 'kisskissnapoli.it', noSiteIcon: true, icons: [
+      'https://radiospinner.com/media/logos/180/39286/logo_buRPJmJrpr.png',
+      'https://media.pcradio.app/media/logos/180/39286/logo_TdGQdSNGpN.jpg',
+      'https://d371i8ihhgym7w.cloudfront.net/42117.png',
+      'https://im1.lixty.com/images/radio-kiss-kiss-napoli-158386-logo.jpg',
+      'https://radio.streamitter.com/images/logos/ZLTRY4.png'], alt: [
+      'https://kisskiss.fluidstream.eu/KKNapoli.mp3',
+      'https://ice08.fluidstream.net/KKNapoli.aac',
+      'https://ice06.fluidstream.net/KKNapoli.aac'] },
     { name: 'Radio Capital', url: 'https://streamcdnb1-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/play1.m3u8', site: 'capital.it', alt: ['https://streamcdnm4-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/play1.m3u8'] },
     { name: 'm2o', url: 'https://streamcdnb1-4c4b867c89244861ac216426883d1ad0.msvdn.net/m2o/m2o/play1.m3u8', site: 'm2o.it', alt: ['https://streamcdnm4-4c4b867c89244861ac216426883d1ad0.msvdn.net/m2o/m2o/play1.m3u8'] },
     { name: 'RTL 102.5', url: 'https://streamcdnm3-dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_audio.m3u8', site: 'rtl.it', alt: [
@@ -1028,7 +1038,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     { name: 'Radio Monte Carlo', url: 'https://icy.unitedradio.it/RMC.mp3', site: 'radiomontecarlo.net' },
     { name: 'RDS', url: 'https://stream.rds.radio/audio/rds.stream_aac64/playlist.m3u8', site: 'rds.it', alt: ['https://icstream.rds.radio/rds'] },
     { name: 'Radio Italia', url: 'https://radioitaliasmi.akamaized.net/hls/live/2093120/RISMI/stream01/streamPlaylist.m3u8', site: 'radioitalia.it', alt: ['https://radioitaliasmi.akamaized.net/hls/live/2093120/RISMI/master.m3u8'] },
-    { name: 'Radio Kiss Kiss', url: 'https://ice07.fluidstream.net/KissKiss.mp3', site: 'kisskiss.it' },
+    { name: 'Radio Kiss Kiss', url: 'https://kisskiss.fluidstream.eu/KissKiss.aac', site: 'kisskiss.it', alt: ['https://ice07.fluidstream.net/KissKiss.mp3', 'https://kisskiss.fluidstream.eu/KissKiss.mp3'] },
     { name: 'Rai Radio 1', url: 'https://icestreaming.rai.it/1.mp3', site: 'raiplaysound.it' },
     { name: 'Rai Radio 2', url: 'https://icestreaming.rai.it/2.mp3', site: 'raiplaysound.it' }
   ].map(x => ({ logo: '', ...x }));
@@ -2094,9 +2104,10 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   const LOGO_CACHE = 'cockpit.logos';
   const logoCache = () => { try { return JSON.parse(localStorage.getItem(LOGO_CACHE) || '{}'); } catch { return {}; } };
   const siteOf = st => (st.site || (/radiodeejay/i.test(st.url) ? 'deejay.it' : '')).trim().replace(/^https?:\/\//, '').split('/')[0];
+  const knownSt = st => RADIO_IT.find(x => x.name.toLowerCase() === st.name.toLowerCase());
   const logoCandidates = async st => {
-    const site = siteOf(st), list = [];
-    if (site) {
+    const site = siteOf(st), known = knownSt(st), list = [...((known && known.icons) || [])];
+    if (site && !(known && known.noSiteIcon)) {
       const host = site.startsWith('www.') ? site : 'www.' + site;
       list.push(`https://${host}/apple-touch-icon.png`, `https://${host}/apple-touch-icon-precomposed.png`);
     }
@@ -2104,7 +2115,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
       const r = await fetch(`https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(st.name)}?limit=8&order=clickcount&reverse=true&hidebroken=true`);
       if (r.ok) (await r.json()).forEach(x => { if (x.favicon && /^https:/.test(x.favicon)) list.push(x.favicon); });
     } catch { /* archivio non raggiungibile */ }
-    if (site) list.push(`https://www.google.com/s2/favicons?domain=${encodeURIComponent(site)}&sz=256`);
+    if (site && !(known && known.noSiteIcon)) list.push(`https://www.google.com/s2/favicons?domain=${encodeURIComponent(site)}&sz=256`);
     return [...new Set(list)];
   };
   const probe = src => new Promise(ok => {
@@ -2126,7 +2137,9 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     const textLogo = () => { $('#stLogo').classList.remove('filled'); $('#stLogo').innerHTML = `<span>${esc(st.name)}</span>`; };
     const job = ++logoJob;
     const key = st.name + '|' + siteOf(st);
-    const cached = logoCache()[key];
+    const kn = knownSt(st);
+    let cached = logoCache()[key];
+    if (cached && kn && kn.icons && !kn.icons.includes(cached)) cached = ''; // icona sbagliata presa prima dal sito
     if (st.logo) showImg(st.logo);
     else if (cached) showImg(cached);
     else {
