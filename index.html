@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v75">
+<meta name="cockpit-version" content="2026-10-19 v76">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -609,7 +609,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v75</small>
+  <small style="opacity:.6">2026-10-19 v76</small>
 </div>
 <script>
   setTimeout(function () {
@@ -914,7 +914,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v75</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v76</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -1014,8 +1014,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   // Radio italiane già pronte (se un indirizzo smette di funzionare, l'app cerca quello nuovo su radio-browser.info)
   const RADIO_IT = [
     { name: 'Radio Deejay', url: STREAMS[0], site: 'deejay.it' },
-    // Sky TG24 non ha uno stream solo audio: è l'audio del canale TV (scarica anche il video)
-    { name: 'Sky TG24', url: 'https://skyanywhere3-i.akamaihd.net/hls/live/510696/tg24/playlist.m3u8', site: 'tg24.sky.it', alt: ['https://skyianywhere2-i.akamaihd.net/hls/live/200275/tg24/playlist.m3u8'] },
+    // TGcom24 non ha uno stream solo audio: è l'audio del canale TV (scarica anche il video; il primo indirizzo va solo dall'Italia)
+    { name: 'TGcom24', url: 'https://live2-mediaset-it.akamaized.net/Content/hls_h0_clr_vos/live/channel(kf)/index.m3u8', site: 'tgcom24.mediaset.it', alt: ['https://d3k8wzt41aflvx.cloudfront.net/TGCOM24/Live.m3u8'] },
     // il sito di Kiss Kiss Napoli ha come icona un ingranaggio generico: il logo arriva dagli archivi delle radio
     { name: 'Radio Kiss Kiss Napoli', url: 'https://kisskiss.fluidstream.eu/KKNapoli.aac', site: 'kisskissnapoli.it', noSiteIcon: true, icons: [
       'https://radiospinner.com/media/logos/180/39286/logo_buRPJmJrpr.png',
@@ -1068,7 +1068,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   let cfg = load();
   // una volta sola: aggiungiamo le radio italiane a quelle già salvate (senza doppioni; quelle tolte non tornano)
   if (!cfg.radioItV1) {
-    cfg.radioItV2 = true; cfg.radioOrderV3 = true; cfg.radioKKNV4 = true;
+    cfg.radioItV2 = true; cfg.radioOrderV3 = true; cfg.radioKKNV4 = true; cfg.radioTgcomV5 = true;
     const have = new Set((cfg.stations || []).map(st => st.name.toLowerCase()));
     cfg.stations = [...(cfg.stations || []), ...RADIO_IT.filter(st => !have.has(st.name.toLowerCase()))];
     cfg.radioItV1 = true;
@@ -1102,6 +1102,20 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
       cfg.stationIdx = Math.max(0, list.indexOf(cur));
     }
     cfg.radioKKNV4 = true;
+    try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch { /* storage pieno */ }
+  }
+  // una volta: TGcom24 al posto di Sky TG24 (che non ha una diretta pubblica)
+  if (!cfg.radioTgcomV5 && cfg.stations && cfg.stations.length) {
+    const list = cfg.stations, cur = list[cfg.stationIdx || 0];
+    const tg = { ...RADIO_IT.find(st => st.name === 'TGcom24') };
+    if (!list.some(st => st.name.toLowerCase() === 'tgcom24')) {
+      const sky = list.findIndex(st => st.name.toLowerCase() === 'sky tg24');
+      if (sky >= 0) list.splice(sky, 1, tg);
+      else list.splice(list.findIndex(st => /deejay/i.test(st.name)) + 1, 0, tg);
+    } else list.splice(0, list.length, ...list.filter(st => st.name.toLowerCase() !== 'sky tg24'));
+    const at = list.indexOf(cur);
+    cfg.stationIdx = at >= 0 ? at : Math.max(0, list.indexOf(list.find(st => st.name === 'TGcom24')));
+    cfg.radioTgcomV5 = true;
     try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch { /* storage pieno */ }
   }
   const diag = msg => window.__diag.note(msg);
