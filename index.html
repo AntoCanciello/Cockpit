@@ -284,7 +284,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v12</small>
+  <small style="opacity:.6">2026-10-19 v13</small>
 </div>
 <script>
   setTimeout(function () {
@@ -415,7 +415,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   <div class="sheet" id="settingsSheet" hidden>
     <form class="sheet-inner" id="settingsForm">
       <header>
-        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v12</small></h1>
+        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v13</small></h1>
         <button class="btn primary" type="submit">Salva</button>
       </header>
 
@@ -743,9 +743,19 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     if (!key) { el.textContent = ''; return; }
     el.style.color = 'var(--muted)'; el.textContent = 'Verifico le versioni del traffico TomTom…';
     const d = await detectTrafficEp(key);
+    // Prova anche un percorso breve con traffico
+    let routeMsg;
+    const from = pos && !pos.stale ? pos : { lat: 40.85, lng: 14.27 };
+    const saveKey = cfg.tomtomKey; cfg.tomtomKey = key; ttErrors = [];
+    try { const rt = await fetchTomTom(from, { lat: from.lat + 0.02, lng: from.lng + 0.02 }); routeMsg = `Percorsi con traffico: OK (${fmtDur(rt.time)}, ritardo ${fmtDur(rt.delay || 0)})`; }
+    catch { routeMsg = `Percorsi con traffico: NON funzionano → ${ttErrors.join(' · ')}`; }
+    cfg.tomtomKey = saveKey;
+    d.results.push(routeMsg);
     if (d.id) {
       const ep = TRAFFIC_EPS.find(e => e.id === d.id);
-      el.style.color = 'var(--ok)'; el.textContent = `✓ Il traffico funziona con ${ep.name}. (${d.results.join(' · ')})`;
+      const routeOk = routeMsg.includes(': OK');
+      el.style.color = routeOk ? 'var(--ok)' : '#ffb74d';
+      el.textContent = `${routeOk ? '✓' : '⚠'} Mappa del traffico OK con ${ep.name}. ${routeMsg}${routeOk ? '' : ' — mandami questo messaggio.'}`;
       if (key === cfg.tomtomKey && cfg.trafficEp !== d.id) { cfg.trafficEp = d.id; save(); applyTraffic(); }
       if (draft) draft.trafficEp = d.id;
     } else {
@@ -825,8 +835,12 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       const q = new URLSearchParams({ key: cfg.tomtomKey, traffic: 'true', travelMode: mode, routeType: 'fastest', instructionsType: 'text', language: 'it-IT', sectionType: 'traffic' });
       if (heading != null && kmhNow > 8) q.set('vehicleHeading', String(Math.round(heading)));
       try {
-        const r = await fetch(`https://api.tomtom.com/routing/1/calculateRoute/${from.lat},${from.lng}:${to.lat},${to.lng}/json?${q}`);
-        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const r = await fetch(`https://api.tomtom.com/routing/1/calculateRoute/${from.lat.toFixed(6)},${from.lng.toFixed(6)}:${to.lat.toFixed(6)},${to.lng.toFixed(6)}/json?${q}`);
+        if (!r.ok) {
+          let why = '';
+          try { const e = await r.json(); why = e.detailedError?.message || e.error?.description || e.formatVersion && JSON.stringify(e).slice(0, 160) || ''; } catch { /* risposta non JSON */ }
+          throw new Error(`errore ${r.status}${why ? ': ' + why : ''}`);
+        }
         const rt = (await r.json()).routes[0];
         const pts = rt.legs.flatMap(l => l.points.map(pt => [pt.latitude, pt.longitude]));
         const cum = withCum(pts);
@@ -842,18 +856,24 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
           from: sc.startPointIndex, to: sc.endPointIndex, mag: sc.magnitudeOfDelay ?? 1, closed: sc.simpleCategory === 'ROAD_CLOSURE'
         }));
         return { pts, cum, total: cum[cum.length - 1], time: rt.summary.travelTimeInSeconds, delay: rt.summary.trafficDelayInSeconds || 0, maneuvers, jams, live: true };
-      } catch (e) { lastErr = e; }
+      } catch (e) { lastErr = e; ttErrors.push(`${mode}: ${e.message || e}`); }
     }
     throw lastErr;
   };
+  let ttErrors = [], ttLastError = '';
   const fetchRoute = async (from, to) => {
     if (cfg.tomtomKey && cfg.traffic !== false) {
-      try { return await fetchTomTom(from, to); } catch { /* TomTom non disponibile: usiamo Valhalla */ }
+      ttErrors = [];
+      try { const r = await fetchTomTom(from, to); ttLastError = ''; return r; }
+      catch (e) { ttLastError = ttErrors.join(' · ') || String(e && e.message || e); }
+      const r = await fetchValhalla(from, to);
+      r.ttFailed = true; // percorso senza traffico: lo diciamo
+      return r;
     }
     return fetchValhalla(from, to);
   };
   // «traffico regolare» o «+5 min traffico» (solo con i dati TomTom)
-  const trafficNote = (r, frac = 1) => !r.live ? '' : (r.delay * frac > 60 ? ` · +${fmtDur(r.delay * frac)} traffico` : ' · traffico regolare');
+  const trafficNote = (r, frac = 1) => r.ttFailed ? ' · traffico non disponibile' : !r.live ? '' : (r.delay * frac > 60 ? ` · +${fmtDur(r.delay * frac)} traffico` : ' · traffico regolare');
 
   // ---------- Formattazione ----------
   const fmtDist = m => m < 1000 ? `${m < 100 ? Math.max(10, Math.round(m / 10) * 10) : Math.round(m / 50) * 50} m` : `${(m / 1000).toFixed(m < 10000 ? 1 : 0).replace('.', ',')} km`;
