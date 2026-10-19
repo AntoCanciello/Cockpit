@@ -1249,12 +1249,15 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     black: { land: '#090b10', water: '#0c1a30', park: '#0d1513', building: '#11151c', minor: '#1f2632', street: '#2a3341', major: '#384456', motorway: '#2f6fd6', label: '#8e99ab', place: '#c9d1de' },
     slate: { land: '#141d2f', water: '#16325c', park: '#17293b', building: '#1b263a', minor: '#2d3b56', street: '#38496c', major: '#4c6492', motorway: '#7398e0', label: '#c0cce4', place: '#e6ecf7' }
   };
-  let vecFail = false, vecOk = false;
+  let vecFail = false, vecOk = false, vecTimer = 0;
   const removeVector = () => { (map.getStyle().layers || []).filter(l => l.id.startsWith('v-')).forEach(l => map.removeLayer(l.id)); };
   function addVectorNight(pal) {
     removeVector();
     if (!map.getSource('omt')) map.addSource('omt', { type: 'vector', url: 'https://tiles.openfreemap.org/planet', attribution: '© OpenFreeMap © OpenMapTiles © OpenStreetMap' });
     map.setGlyphs('https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf');
+    // se dopo 8 secondi non è arrivato nulla (server irraggiungibile), torniamo alla notte TomTom
+    clearTimeout(vecTimer);
+    vecTimer = setTimeout(() => { if (!vecOk && map.getLayer('v-water')) { vecFail = true; diag('mappa notturna vettoriale non arriva: torno a TomTom'); applyBase(); } }, 8000);
     const before = ['traffic', 'alts-casing'].find(l => map.getLayer(l));
     const add = l => map.addLayer({ ...l, id: 'v-' + l.id, source: 'omt' }, before);
     const w = (a, b, c) => ['interpolate', ['exponential', 1.5], ['zoom'], 8, a, 13, b, 18, c];
