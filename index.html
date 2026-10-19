@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v81">
+<meta name="cockpit-version" content="2026-10-19 v82">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -439,11 +439,23 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 #pContacts.open .ctoggle .ico-x, .map-br.open .fab-toggle .ico-close { opacity: 1; transform: none; }
 /* righe dei contatti: escono dal pulsante, dal basso verso l'alto, una dopo l'altra */
 #app[data-mode="home"] #pContacts { transition: padding-right .25s cubic-bezier(.2,.8,.2,1); }
-#app[data-mode="home"] #pContacts > .contact { transform-origin: 100% 100%; transition: opacity .22s ease, transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s; }
-#app[data-mode="home"] #pContacts:not(.open) > .contact { opacity: 0; transform: translate(24px, 20px) scale(.85); visibility: hidden; transition: opacity .16s ease, transform .2s ease-in, visibility 0s .2s; }
-#app[data-mode="home"] #pContacts.open > .contact { transition-delay: .1s; }
-#app[data-mode="home"] #pContacts.open > .contact:nth-child(1) { transition-delay: .19s; }
-#app[data-mode="home"] #pContacts.open > .contact:nth-child(2) { transition-delay: .145s; }
+#app[data-mode="home"] #pContacts .clist > .contact { transform-origin: 100% 100%; transition: opacity .22s ease, transform .3s cubic-bezier(.2,.8,.2,1), visibility 0s; }
+#app[data-mode="home"] #pContacts:not(.open) .clist > .contact { opacity: 0; transform: translate(24px, 20px) scale(.85); visibility: hidden; transition: opacity .16s ease, transform .2s ease-in, visibility 0s .2s; }
+#app[data-mode="home"] #pContacts.open .clist > .contact { transition-delay: .1s; }
+#app[data-mode="home"] #pContacts.open .clist > .contact:nth-child(1) { transition-delay: .19s; }
+#app[data-mode="home"] #pContacts.open .clist > .contact:nth-child(2) { transition-delay: .145s; }
+/* lista dei contatti: se ne vedono 3 alla volta, gli altri si raggiungono scorrendo in giù (se sono di più, la quarta riga si intravede) */
+.clist { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-snap-type: y proximity; container-type: size; border-radius: 16px; }
+.clist::-webkit-scrollbar { display: none; }
+.clist > .contact { flex: 0 0 calc((100cqh - 16px) / 3); scroll-snap-align: start; }
+.clist.many > .contact { flex-basis: calc((100cqh - 16px - 18px) / 3); }
+#app[data-mode="home"] #pContacts:not(.open) .clist { pointer-events: none; }
+#stage.short #app[data-mode="home"] .clist { gap: 6px; }
+#stage.short #app[data-mode="home"] .clist > .contact { flex-basis: calc((100cqh - 12px) / 3); }
+#stage.short #app[data-mode="home"] .clist.many > .contact { flex-basis: calc((100cqh - 12px - 14px) / 3); }
+/* in verticale il riquadro prende l'altezza dal contenuto: righe fisse e lista alta al massimo 3 righe */
+#stage:not(.land) #app[data-mode="home"] .clist { container-type: normal; flex: 0 0 auto; gap: 6px; max-height: calc(3 * 56px + 2 * 6px); }
+#stage:not(.land) #app[data-mode="home"] .clist.many { max-height: calc(3 * 56px + 3 * 6px + 16px); }
 /* pagine a swipe (meteo, calendario): spariscono in dissolvenza quando escono i contatti e tornano quando si richiudono */
 .cpages { display: none; }
 #app[data-mode="home"] .cpages { display: block; position: absolute; inset: 0; z-index: 1; overflow: hidden; border-radius: inherit; touch-action: none; transition: opacity .3s ease .14s, transform .34s cubic-bezier(.2,.8,.2,1) .14s; }
@@ -558,6 +570,9 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 .tbtn.save { background: var(--fg); color: var(--bg); border-color: var(--fg); }
 .tbtn.wide { width: 100%; }
 .tbtn.small { height: 34px; padding: 0 12px; font-size: 14px; }
+.tbtn.danger { color: #ff8a80; }
+.c-acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.tbtn.c-add { width: 100%; height: 48px; margin-top: 4px; color: var(--accent); border-style: dashed; background: transparent; }
 .vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
 .set-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 220px minmax(0, 1fr); }
 .set-nav { display: flex; flex-direction: column; gap: 2px; padding: 14px 10px max(14px, var(--sb)) max(10px, var(--sl)); border-right: 1px solid var(--line); overflow-y: auto; }
@@ -612,7 +627,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v81</small>
+  <small style="opacity:.6">2026-10-19 v82</small>
 </div>
 <script>
   setTimeout(function () {
@@ -917,7 +932,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v81</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v82</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -1060,10 +1075,11 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     ]
   };
   const KEY = 'cockpit.v1';
+  const MAX_CONTACTS = 30;
   const load = () => {
     try {
       const s = JSON.parse(localStorage.getItem(KEY) || '{}');
-      const c = { ...structuredClone(DEFAULTS), ...s, contacts: (s.contacts || structuredClone(DEFAULTS.contacts)).slice(0, 3) };
+      const c = { ...structuredClone(DEFAULTS), ...s, contacts: (s.contacts || structuredClone(DEFAULTS.contacts)).slice(0, MAX_CONTACTS) };
       if (!s.stations && s.stream) c.stations = [{ name: 'Radio Deejay', url: s.stream, logo: '', site: 'deejay.it' }]; // vecchie impostazioni
       return c;
     }
@@ -2494,13 +2510,13 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   const renderContacts = () => {
     const box = $('#pContacts');
     const list = cfg.contacts.filter(c => c.phone || c.shortcut);
-    $$('.contact', box).forEach(e => e.remove());
+    $('#cList')?.remove();
     if (!list.length) {
-      box.insertAdjacentHTML('afterbegin', '<button class="contact empty" id="cfgContacts">Aggiungi i tuoi 3 contatti preferiti</button>');
-      $('#cfgContacts').addEventListener('click', openSettings);
+      box.insertAdjacentHTML('afterbegin', '<div class="clist" id="cList"><button class="contact empty" id="cfgContacts">Aggiungi i tuoi contatti preferiti</button></div>');
+      $('#cfgContacts').addEventListener('click', () => addContactFromPanel());
       return;
     }
-    box.insertAdjacentHTML('afterbegin', list.map(c => {
+    box.insertAdjacentHTML('afterbegin', `<div class="clist${list.length >= 3 ? ' many' : ''}" id="cList">` + list.map(c => {
       const d = digits(c.phone);
       const wa = c.shortcut ? `shortcuts://run-shortcut?name=${encodeURIComponent(c.shortcut)}` : `https://wa.me/${d}`;
       const name = c.name || c.phone;
@@ -2512,12 +2528,18 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
         ${showWa ? `<a class="cbtn wa" href="${wa}" aria-label="WhatsApp ${esc(name)}">${icoWa}</a>` : ''}
         ${d ? `<a class="cbtn tel" href="tel:+${d}" aria-label="Chiama ${esc(name)}">${icoTel}</a>` : ''}
       </div>`;
-    }).join('') + (list.length < 3 ? '<button class="contact add" id="addContact" type="button">+ Aggiungi contatto</button>' : ''));
-    $('#addContact')?.addEventListener('click', () => {
-      openSettings(); showSec('contatti');
-      const i = cfg.contacts.findIndex(c => !c.phone && !c.shortcut);
-      setTimeout(() => { const f = $('#cN' + (i < 0 ? 2 : i)); scrollInside(f, $('.set-main')); }, 120);
-    });
+    }).join('') + (list.length < MAX_CONTACTS ? '<button class="contact add" id="addContact" type="button">+ Aggiungi contatto</button>' : '') + '</div>');
+    $('#addContact')?.addEventListener('click', () => addContactFromPanel());
+    // mentre si scorre la lista i contatti restano aperti
+    $('#cList').addEventListener('scroll', () => { if ($('#pContacts').classList.contains('open')) openContacts(true); }, { passive: true });
+  };
+  // «Aggiungi contatto»: apre le impostazioni su un contatto vuoto (nuovo, se non ce n'è uno libero)
+  const addContactFromPanel = () => {
+    openSettings(); showSec('contatti');
+    readContactsForm();
+    let i = draft.contacts.findIndex(c => !c.name && !c.phone && !c.shortcut);
+    if (i < 0) { draft.contacts.push({ name: '', phone: '', shortcut: '', mode: 'wa' }); i = draft.contacts.length - 1; fillContactsForm(); }
+    setTimeout(() => { const f = $('#cN' + i); scrollInside(f, $('.set-main')); }, 120);
   };
 
   // ---------- Ricerca destinazione (OpenStreetMap / Nominatim) ----------
@@ -2593,11 +2615,19 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   // ---------- Impostazioni ----------
   const settingsSheet = $('#settingsSheet');
   let draft = null;
+  // legge i campi già scritti, così aggiungendo o togliendo un contatto non si perde niente
+  const readContactsForm = () => {
+    if (!draft) return;
+    draft.contacts = draft.contacts.map((c, i) => $('#cN' + i) ? {
+      name: $('#cN' + i).value.trim(), phone: $('#cP' + i).value.trim(), shortcut: $('#cS' + i).value.trim(), mode: $('#cM' + i).value
+    } : c);
+  };
   const fillContactsForm = () => {
     const canPick = 'contacts' in navigator && typeof navigator.contacts.select === 'function';
+    if (!draft.contacts.length) draft.contacts.push({ name: '', phone: '', shortcut: '', mode: 'wa' });
     $('#sContacts').innerHTML = draft.contacts.map((c, i) => `
       <div class="group">
-        <div class="item inline"><span class="item-head">Contatto ${i + 1}</span><button type="button" class="tbtn small" data-pick="${i}">Scegli dalla rubrica</button></div>
+        <div class="item inline"><span class="item-head">Contatto ${i + 1}</span><span class="c-acts"><button type="button" class="tbtn small" data-pick="${i}">Scegli dalla rubrica</button><button type="button" class="tbtn small danger" data-cdel="${i}" aria-label="Rimuovi contatto ${i + 1}">Rimuovi</button></span></div>
         <div class="item two">
           <div><label for="cN${i}">Nome</label><input type="text" id="cN${i}" name="c${i}-name" autocomplete="section-c${i} name" value="${esc(c.name || '')}" placeholder="Es. Marco"></div>
           <div><label for="cP${i}">Numero</label><input type="tel" id="cP${i}" name="c${i}-tel" autocomplete="section-c${i} tel" value="${esc(c.phone || '')}" placeholder="Es. 333 1234567"></div>
@@ -2610,7 +2640,19 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
             </select></div>
           <div><label for="cS${i}">Comando rapido (facoltativo)</label><input type="text" id="cS${i}" autocomplete="off" value="${esc(c.shortcut || '')}" placeholder="Es. Chiama Marco WA"></div>
         </div>
-      </div>`).join('');
+      </div>`).join('') + (draft.contacts.length < MAX_CONTACTS ? '<button type="button" class="tbtn c-add" id="sAddContact">+ Aggiungi contatto</button>' : '');
+    $('#sAddContact')?.addEventListener('click', () => {
+      readContactsForm();
+      draft.contacts.push({ name: '', phone: '', shortcut: '', mode: 'wa' });
+      fillContactsForm();
+      const i = draft.contacts.length - 1;
+      setTimeout(() => { scrollInside($('#cN' + i), $('.set-main')); $('#cN' + i).focus({ preventScroll: true }); }, 60);
+    });
+    $$('[data-cdel]').forEach(b => b.addEventListener('click', () => {
+      readContactsForm();
+      draft.contacts.splice(+b.dataset.cdel, 1);
+      fillContactsForm();
+    }));
     $$('[data-pick]').forEach(b => b.addEventListener('click', async () => {
       const i = b.dataset.pick;
       if (!canPick) {
@@ -2774,9 +2816,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     readStationsForm();
     draft.stations = draft.stations.filter(st => st.url).map(st => ({ ...st, name: st.name || 'Radio' }));
     if (!draft.stations.length) draft.stations = [{ name: 'Radio Deejay', url: STREAMS[0], logo: '', site: 'deejay.it' }];
-    draft.contacts = draft.contacts.map((_, i) => ({
-      name: $('#cN' + i).value.trim(), phone: $('#cP' + i).value.trim(), shortcut: $('#cS' + i).value.trim(), mode: $('#cM' + i).value
-    }));
+    readContactsForm();
+    draft.contacts = draft.contacts.filter(c => c.name || c.phone || c.shortcut); // i contatti lasciati vuoti non si salvano
     const prevUrl = curStation().url;
     cfg = draft; save(); layout();
     renderBrand(); renderContacts(); renderStation(); renderVoice(); applyTraffic(); applyDesign(); if (nav.active) follow(true);
