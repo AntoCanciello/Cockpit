@@ -284,7 +284,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v13</small>
+  <small style="opacity:.6">2026-10-19 v14</small>
 </div>
 <script>
   setTimeout(function () {
@@ -415,7 +415,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   <div class="sheet" id="settingsSheet" hidden>
     <form class="sheet-inner" id="settingsForm">
       <header>
-        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v13</small></h1>
+        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v14</small></h1>
         <button class="btn primary" type="submit">Salva</button>
       </header>
 
@@ -567,6 +567,14 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       stage.style.transform = cfg.rotate === 'r' ? `translate(${w}px,0) rotate(90deg)` : `translate(0,${h}px) rotate(-90deg)`;
     } else {
       stage.style.width = ''; stage.style.height = ''; stage.style.transform = ''; // lo fa il CSS: tutto schermo
+    }
+    // In orizzontale iOS lascia lo stesso margine su tutti e due i lati, ma la Dynamic Island è solo da una parte:
+    // dall'altra parte usiamo tutto lo spazio
+    const angle = (screen.orientation && typeof screen.orientation.angle === 'number') ? screen.orientation.angle : (window.orientation ?? 0);
+    stage.style.removeProperty('--sl'); stage.style.removeProperty('--sr');
+    if (!rotate && w > h) {
+      if (angle === 90) stage.style.setProperty('--sr', '0px');                    // isola a sinistra
+      else if (angle === 270 || angle === -90) stage.style.setProperty('--sl', '0px'); // isola a destra
     }
     refreshMap();
   };
