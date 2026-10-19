@@ -478,7 +478,9 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
           <input type="text" id="sTomtom" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla qui la tua chiave API">
         </label>
         <p class="note" id="tomtomCheck" aria-live="polite"></p>
-        <p class="note">Il traffico arriva da TomTom, gratis per uso personale. Crea un account su <b>developer.tomtom.com</b>, apri «API Keys», copia la chiave e incollala qui. Con la chiave anche l'orario di arrivo tiene conto del traffico.</p>
+        <p class="note" id="trafficStatus" aria-live="polite"></p>
+        <button type="button" class="btn" id="testTraffic">Verifica traffico</button>
+        <p class="note">Il traffico arriva da TomTom, gratis per uso personale. Crea un account su <b>developer.tomtom.com</b>, apri «API Keys», copia la chiave e incollala qui. Con la chiave anche l'orario di arrivo tiene conto del traffico. Sulla mappa: verde scorrevole, arancione rallentato, rosso coda.</p>
       </fieldset>
 
       <button type="button" class="btn" data-close>Chiudi senza salvare</button>
@@ -657,45 +659,41 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 
   // ---------- Traffico (TomTom): solo code e rallentamenti, come Google ----------
   let trafficLayer = null;
+  const trafficStats = { ok: 0, err: 0, lastErr: '' };
   function applyTraffic() {
     applyBase();
     if (!map) return;
     if (trafficLayer) { trafficLayer.remove(); trafficLayer = null; }
+    trafficStats.ok = 0; trafficStats.err = 0; trafficStats.lastErr = '';
     if (cfg.traffic === false || !cfg.tomtomKey) return;
-    const key = encodeURIComponent(cfg.tomtomKey);
-    const Traffic = L.GridLayer.extend({
-      createTile(c, done) {
-        const tile = document.createElement('canvas');
-        const size = this.getTileSize();
-        tile.width = size.x; tile.height = size.y;
-        const ctx = tile.getContext('2d');
-        const url = `https://api.tomtom.com/traffic/map/4/tile/flow/relative0/${c.z}/${c.x}/${c.y}.png?key=${key}&tileSize=256&thickness=7`;
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          ctx.drawImage(img, 0, 0, size.x, size.y);
-          try {
-            const d = ctx.getImageData(0, 0, size.x, size.y), px = d.data;
-            for (let i = 0; i < px.length; i += 4) {
-              const r = px[i], g = px[i + 1], b = px[i + 2];
-              if (g > r * 1.15 && g > b * 1.15) px[i + 3] = 0; // via il verde (traffico scorrevole)
-            }
-            ctx.putImageData(d, 0, 0);
-          } catch { /* immagine non elaborabile: la mostriamo intera */ }
-          done(null, tile);
-        };
-        img.onerror = () => {
-          // Senza permesso CORS: mostriamo la tile originale, verde compreso
-          const plain = new Image();
-          plain.onload = () => { ctx.drawImage(plain, 0, 0, size.x, size.y); done(null, tile); };
-          plain.onerror = () => done(null, tile);
-          plain.src = url;
-        };
-        img.src = url;
-        return tile;
-      }
+    // Colori come Google: verde scorrevole, arancione rallentato, rosso coda
+    trafficLayer = L.tileLayer(`https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${encodeURIComponent(cfg.tomtomKey)}&tileSize=256&thickness=6`, {
+      pane: 'traffic', tileSize: 256, maxZoom: 20, maxNativeZoom: 20, opacity: .9, attribution: 'Traffico © TomTom', updateWhenIdle: true
     });
-    trafficLayer = new Traffic({ pane: 'traffic', tileSize: 256, maxZoom: 20, maxNativeZoom: 20, opacity: .9, attribution: 'Traffico © TomTom', updateWhenIdle: true }).addTo(map);
+    trafficLayer.on('tileload', () => { trafficStats.ok++; });
+    trafficLayer.on('tileerror', () => { trafficStats.err++; });
+    trafficLayer.addTo(map);
+  }
+  // Prova diretta della chiave: dice se il traffico risponde e perché no
+  async function testTraffic() {
+    const el = $('#trafficStatus');
+    if (!el) return;
+    const key = tomtomKeyFrom($('#sTomtom').value);
+    if (!key) { el.textContent = ''; return; }
+    el.style.color = 'var(--muted)'; el.textContent = 'Verifico il traffico…';
+    const c = pos && !pos.stale ? pos : { lat: 40.85, lng: 14.27 };
+    const z = 12, n = 2 ** z;
+    const x = Math.floor((c.lng + 180) / 360 * n);
+    const y = Math.floor((1 - Math.log(Math.tan(c.lat * Math.PI / 180) + 1 / Math.cos(c.lat * Math.PI / 180)) / Math.PI) / 2 * n);
+    try {
+      const r = await fetch(`https://api.tomtom.com/traffic/map/4/tile/flow/relative0/${z}/${x}/${y}.png?key=${encodeURIComponent(key)}&tileSize=256`);
+      if (r.ok) { el.style.color = 'var(--ok)'; el.textContent = `✓ Il traffico risponde (${trafficStats.ok} riquadri caricati sulla mappa${trafficStats.err ? `, ${trafficStats.err} errori` : ''}).`; }
+      else if (r.status === 403 || r.status === 401) { el.style.color = '#ff8a80'; el.textContent = `✗ TomTom rifiuta la chiave per il traffico (errore ${r.status}). Su developer.tomtom.com apri la chiave e controlla in «Products» che «Traffic» sia attivo.`; }
+      else { el.style.color = '#ff8a80'; el.textContent = `✗ Il traffico non risponde (errore ${r.status}). Riprova tra poco.`; }
+    } catch {
+      el.style.color = trafficStats.ok ? 'var(--ok)' : '#ff8a80';
+      el.textContent = trafficStats.ok ? `✓ ${trafficStats.ok} riquadri del traffico caricati sulla mappa.` : '✗ Non riesco a contattare TomTom: controlla la connessione.';
+    }
   }
   setInterval(() => { if (trafficLayer && document.visibilityState === 'visible') trafficLayer.redraw(); }, 180000);
 
@@ -917,7 +915,8 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     // Barra arrivo
     const secs = r.time * (remain / (r.total || 1));
     $('#navEta').textContent = fmtClock(new Date(Date.now() + secs * 1000));
-    $('#navLeft').textContent = `${fmtDur(secs)} · ${fmtDist(remain)}`;
+    const late = (r.delay || 0) * (remain / (r.total || 1));
+    $('#navLeft').textContent = `${fmtDur(secs)} · ${fmtDist(remain)}${late > 60 ? ` · +${fmtDur(late)} traffico` : ''}`;
     // Voce: preavviso e momento della manovra, anticipati in base alla velocità
     const v = Math.min(Math.max(kmhNow, 20), 130) / 3.6;
     const farAt = Math.max(250, v * 14), nearAt = Math.max(45, v * 5);
@@ -1187,6 +1186,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     $('#sTraffic').checked = draft.traffic !== false;
     $('#sTomtom').value = draft.tomtomKey || '';
     checkTomtom();
+    testTraffic();
     draft.stations = structuredClone(stations());
     fillStations();
     fillContactsForm(); showLogoPrev();
@@ -1202,6 +1202,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     else { el.style.color = '#ff8a80'; el.textContent = /…|\.\.\./.test(raw) ? '✗ La chiave copiata è incompleta (ha i puntini): sul sito TomTom tocca una volta la chiave per copiarla intera.' : '✗ Non sembra una chiave TomTom completa (servono 32 lettere e numeri).'; }
   }
   $('#sTomtom').addEventListener('input', checkTomtom);
+  $('#testTraffic').addEventListener('click', testTraffic);
   const closeSheets = () => { $$('.sheet').forEach(s => { s.hidden = true; }); layout(); };
   $('#openSettings').addEventListener('click', openSettings);
   $$('[data-close]').forEach(b => b.addEventListener('click', closeSheets));
