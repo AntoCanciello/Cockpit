@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v64">
+<meta name="cockpit-version" content="2026-10-19 v65">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -264,6 +264,15 @@ main {
 .status.live { color: var(--fg); }
 @keyframes pulse { 50% { opacity: .35; } }
 .radio-ctrl { display: flex; align-items: center; gap: 22px; }
+/* onda sonora animata: si muove mentre la radio suona, in pausa diventa una fila di puntini */
+.wave { position: relative; flex: 1 1 auto; align-self: stretch; min-height: 54px; max-height: 120px; width: 100%; display: block; border-radius: 16px; }
+.wave canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.wave-hint { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.55); letter-spacing: .3px; transition: opacity .3s; pointer-events: none; }
+#pRadio.playing .wave-hint { opacity: 0; }
+#stage.land #app[data-mode="home"] .wave { margin-block: auto; max-height: 96px; }
+#app[data-mode="radio"] .wave { max-height: 200px; min-height: 120px; max-width: 760px; margin-inline: auto; }
+#stage:not(.land) #app[data-mode="home"] .wave { min-height: 48px; max-height: 64px; }
+#stage:not(.land) #app[data-mode="home"] .wave-hint { bottom: 0; font-size: 11px; }
 .rbtn { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--panel-2); color: var(--fg); flex: 0 0 auto; }
 .rbtn svg { width: 24px; height: 24px; }
 .rbtn:disabled { opacity: .3; }
@@ -599,7 +608,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v64</small>
+  <small style="opacity:.6">2026-10-19 v65</small>
 </div>
 <script>
   setTimeout(function () {
@@ -702,7 +711,11 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
       <section class="panel" id="pRadio" aria-label="Radio">
         <div class="st-logo" id="stLogo"></div>
         <div class="st-meta"><b id="stName"></b><span class="status" id="radioStatus"><i></i><span>Pronta</span></span></div>
-        <div class="radio-ctrl">
+        <button class="wave" id="wave" type="button" aria-label="Play">
+          <canvas id="waveCv"></canvas>
+          <span class="wave-hint" id="waveHint">Tocca per ascoltare</span>
+        </button>
+        <div class="radio-ctrl" hidden>
           <button class="rbtn" id="prevSt" aria-label="Stazione precedente">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2.2v14H6zM20 5.6v12.8a.8.8 0 0 1-1.2.7L9.6 12.7a.8.8 0 0 1 0-1.4l9.2-6.4a.8.8 0 0 1 1.2.7z"/></svg>
           </button>
@@ -900,7 +913,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v64</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v65</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -2021,6 +2034,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   const setStatus = (txt, live = false) => { status.querySelector('span').textContent = txt; status.classList.toggle('live', live); };
   const setPlayingUI = on => {
     $('#pRadio').classList.toggle('playing', on);
+    setWave(on ? 1 : wantPlay ? .35 : 0);
+    $('#wave').setAttribute('aria-label', on ? 'Pausa' : 'Play');
     if (on) swapIcons($('#icoPause'), $('#icoPlay')); else swapIcons($('#icoPlay'), $('#icoPause'));
     $('#play').setAttribute('aria-label', on ? 'Pausa' : 'Play');
   };
@@ -2089,8 +2104,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     wantPlay = true;
     const list = streamList();
     if (!audio.src || !list.includes(audio.src)) { streamIdx = 0; audio.src = list[0]; }
-    setStatus('Connessione…');
-    audio.play().catch(() => setStatus('Tocca play'));
+    setStatus('Connessione…'); setWave(.35);
+    audio.play().catch(() => { setStatus('Tocca play'); setWave(0); });
   };
   const stopRadio = () => {
     wantPlay = false;
@@ -2144,6 +2159,63 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
   }
   $('#play').addEventListener('click', () => (wantPlay ? stopRadio() : playRadio()));
+  // ---------- Onda sonora (animazione: su iPhone una pagina web non può leggere il suono di una radio di un altro sito) ----------
+  const wave = { amp: 0, target: 0, raf: 0 };
+  const waveCv = $('#waveCv'), waveCtx = waveCv.getContext('2d');
+  const sizeWave = () => {
+    const r = waveCv.getBoundingClientRect(), d = Math.min(3, devicePixelRatio || 1);
+    const w = Math.round(r.width * d), h = Math.round(r.height * d);
+    if (w && h && (waveCv.width !== w || waveCv.height !== h)) { waveCv.width = w; waveCv.height = h; }
+  };
+  const drawWave = now => {
+    const W = waveCv.width, H = waveCv.height, g = waveCtx;
+    if (!W || !H) return;
+    const d = W / waveCv.clientWidth || 1, t = now / 1000, mid = H / 2;
+    wave.amp += (wave.target - wave.amp) * .06;
+    const amp = wave.target > 0 && wave.target < 1 ? wave.amp * (.6 + .4 * Math.sin(t * 3)) : wave.amp; // in collegamento: respira
+    g.clearRect(0, 0, W, H);
+    const n = Math.max(30, Math.floor(W / (5.2 * d))), step = W / (n + 1);
+    // «gobbe» dell'onda che crescono, calano e si spostano lentamente
+    const bumps = [
+      [.24 + .03 * Math.sin(t * .7), .07, .75 + .25 * Math.sin(t * 1.9)],
+      [.36 + .02 * Math.sin(t * .9 + 1), .045, .9 + .2 * Math.sin(t * 2.6 + 2)],
+      [.5 + .025 * Math.sin(t * 1.1 + 2), .05, 1 + .12 * Math.sin(t * 2.2 + 4)],
+      [.62 + .02 * Math.sin(t * .8 + 3), .045, .55 + .3 * Math.sin(t * 1.7 + 1)],
+      [.73 + .03 * Math.sin(t * .6 + 5), .055, .45 + .2 * Math.sin(t * 2.9 + 3)]
+    ];
+    const hmax = mid * .92;
+    for (const glow of [true, false]) {
+      g.lineCap = 'round';
+      g.lineWidth = (glow ? 5 : 2.2) * d;
+      for (let i = 1; i <= n; i++) {
+        const x = i / (n + 1);
+        let e = 0;
+        for (const [c, w, a] of bumps) e += a * Math.exp(-(((x - c) / w) ** 2));
+        e = Math.min(1, e) * Math.pow(Math.sin(Math.PI * x), .5);
+        const flick = .78 + .22 * Math.sin(t * 9 + i * .85) * Math.sin(t * 5.3 + i * .37);
+        let h = e * hmax * amp * flick * (glow ? .5 : 1);
+        h = Math.max(h, (glow ? 0 : 1.1) * d);
+        if (glow && h < 2 * d) continue;
+        const hue = (282 + x * 118) % 360; // viola → magenta → rosso → arancione
+        g.strokeStyle = `hsla(${hue}, ${glow ? 95 : 88}%, ${glow ? 72 : 62}%, ${glow ? .22 : .95})`;
+        g.beginPath(); g.moveTo(i * step, mid - h); g.lineTo(i * step, mid + h); g.stroke();
+      }
+    }
+  };
+  const waveLoop = now => {
+    wave.raf = 0;
+    if (document.visibilityState !== 'visible' || !waveCv.offsetParent) return;
+    sizeWave(); drawWave(now);
+    // continua finché c'è movimento (in pausa, una volta appiattita, l'onda resta ferma)
+    if (motion() && (wave.target > 0 || Math.abs(wave.amp - wave.target) > .005)) wave.raf = requestAnimationFrame(waveLoop);
+  };
+  const kickWave = () => { if (!wave.raf) wave.raf = requestAnimationFrame(waveLoop); };
+  const setWave = v => { wave.target = v; if (!motion()) wave.amp = v; kickWave(); };
+  new ResizeObserver(kickWave).observe(waveCv);
+  document.addEventListener('visibilitychange', kickWave);
+  // un tocco sull'onda o sul logo: play / pausa
+  $('#wave').addEventListener('click', () => $('#play').click());
+  $('#stLogo').addEventListener('click', () => $('#play').click());
   $('#prevSt').addEventListener('click', () => switchStation(-1));
   $('#nextSt').addEventListener('click', () => switchStation(1));
   audio.addEventListener('playing', () => {
