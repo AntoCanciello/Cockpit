@@ -477,6 +477,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
         <label for="sTomtom">Chiave TomTom
           <input type="text" id="sTomtom" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Incolla qui la tua chiave API">
         </label>
+        <p class="note" id="tomtomCheck" aria-live="polite"></p>
         <p class="note">Il traffico arriva da TomTom, gratis per uso personale. Crea un account su <b>developer.tomtom.com</b>, apri «API Keys», copia la chiave e incollala qui. Con la chiave anche l'orario di arrivo tiene conto del traffico.</p>
       </fieldset>
 
@@ -1185,11 +1186,22 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     $('#sVoice').checked = draft.voice !== false;
     $('#sTraffic').checked = draft.traffic !== false;
     $('#sTomtom').value = draft.tomtomKey || '';
+    checkTomtom();
     draft.stations = structuredClone(stations());
     fillStations();
     fillContactsForm(); showLogoPrev();
     settingsSheet.hidden = false; settingsSheet.scrollTop = 0; layout();
   }
+  // La chiave TomTom è di 32 lettere/numeri: la estraiamo anche da una riga intera incollata
+  const tomtomKeyFrom = v => { const m = (v || '').match(/[A-Za-z0-9]{32}/); return m ? m[0] : (v || '').replace(/\s+/g, ''); };
+  function checkTomtom() {
+    const raw = $('#sTomtom').value, el = $('#tomtomCheck');
+    if (!raw.trim()) { el.textContent = ''; return; }
+    const m = raw.match(/[A-Za-z0-9]{32}/);
+    if (m) { el.style.color = 'var(--ok)'; el.textContent = `✓ Chiave riconosciuta: ${m[0].slice(0, 4)}…${m[0].slice(-4)} (32 caratteri). Tocca Salva.`; }
+    else { el.style.color = '#ff8a80'; el.textContent = /…|\.\.\./.test(raw) ? '✗ La chiave copiata è incompleta (ha i puntini): sul sito TomTom tocca una volta la chiave per copiarla intera.' : '✗ Non sembra una chiave TomTom completa (servono 32 lettere e numeri).'; }
+  }
+  $('#sTomtom').addEventListener('input', checkTomtom);
   const closeSheets = () => { $$('.sheet').forEach(s => { s.hidden = true; }); layout(); };
   $('#openSettings').addEventListener('click', openSettings);
   $$('[data-close]').forEach(b => b.addEventListener('click', closeSheets));
@@ -1251,7 +1263,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     draft.autoplay = $('#sAutoplay').checked;
     draft.voice = $('#sVoice').checked;
     draft.traffic = $('#sTraffic').checked;
-    draft.tomtomKey = $('#sTomtom').value.trim();
+    draft.tomtomKey = tomtomKeyFrom($('#sTomtom').value);
     delete draft.tomtomKeyMapFail;
     readStationsForm();
     draft.stations = draft.stations.filter(st => st.url).map(st => ({ ...st, name: st.name || 'Radio' }));
