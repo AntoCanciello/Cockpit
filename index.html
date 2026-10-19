@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v82">
+<meta name="cockpit-version" content="2026-10-19 v83">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -444,18 +444,15 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 #app[data-mode="home"] #pContacts.open .clist > .contact { transition-delay: .1s; }
 #app[data-mode="home"] #pContacts.open .clist > .contact:nth-child(1) { transition-delay: .19s; }
 #app[data-mode="home"] #pContacts.open .clist > .contact:nth-child(2) { transition-delay: .145s; }
-/* lista dei contatti: se ne vedono 3 alla volta, gli altri si raggiungono scorrendo in giù (se sono di più, la quarta riga si intravede) */
-.clist { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-snap-type: y proximity; container-type: size; border-radius: 16px; }
+/* lista dei contatti: se ne vedono esattamente 3 alla volta, gli altri si raggiungono scorrendo in giù (lo scorrimento si ferma sempre su una riga intera) */
+.clist { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; scroll-snap-type: y mandatory; container-type: size; border-radius: 16px; }
 .clist::-webkit-scrollbar { display: none; }
 .clist > .contact { flex: 0 0 calc((100cqh - 16px) / 3); scroll-snap-align: start; }
-.clist.many > .contact { flex-basis: calc((100cqh - 16px - 18px) / 3); }
 #app[data-mode="home"] #pContacts:not(.open) .clist { pointer-events: none; }
 #stage.short #app[data-mode="home"] .clist { gap: 6px; }
 #stage.short #app[data-mode="home"] .clist > .contact { flex-basis: calc((100cqh - 12px) / 3); }
-#stage.short #app[data-mode="home"] .clist.many > .contact { flex-basis: calc((100cqh - 12px - 14px) / 3); }
 /* in verticale il riquadro prende l'altezza dal contenuto: righe fisse e lista alta al massimo 3 righe */
 #stage:not(.land) #app[data-mode="home"] .clist { container-type: normal; flex: 0 0 auto; gap: 6px; max-height: calc(3 * 56px + 2 * 6px); }
-#stage:not(.land) #app[data-mode="home"] .clist.many { max-height: calc(3 * 56px + 3 * 6px + 16px); }
 /* pagine a swipe (meteo, calendario): spariscono in dissolvenza quando escono i contatti e tornano quando si richiudono */
 .cpages { display: none; }
 #app[data-mode="home"] .cpages { display: block; position: absolute; inset: 0; z-index: 1; overflow: hidden; border-radius: inherit; touch-action: none; transition: opacity .3s ease .14s, transform .34s cubic-bezier(.2,.8,.2,1) .14s; }
@@ -627,7 +624,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v82</small>
+  <small style="opacity:.6">2026-10-19 v83</small>
 </div>
 <script>
   setTimeout(function () {
@@ -932,7 +929,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v82</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v83</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -2512,11 +2509,10 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     const list = cfg.contacts.filter(c => c.phone || c.shortcut);
     $('#cList')?.remove();
     if (!list.length) {
-      box.insertAdjacentHTML('afterbegin', '<div class="clist" id="cList"><button class="contact empty" id="cfgContacts">Aggiungi i tuoi contatti preferiti</button></div>');
-      $('#cfgContacts').addEventListener('click', () => addContactFromPanel());
+      box.insertAdjacentHTML('afterbegin', '<div class="clist" id="cList"><div class="contact empty">Nessun contatto: aggiungili in Impostazioni → Contatti</div></div>');
       return;
     }
-    box.insertAdjacentHTML('afterbegin', `<div class="clist${list.length >= 3 ? ' many' : ''}" id="cList">` + list.map(c => {
+    box.insertAdjacentHTML('afterbegin', '<div class="clist" id="cList">' + list.map(c => {
       const d = digits(c.phone);
       const wa = c.shortcut ? `shortcuts://run-shortcut?name=${encodeURIComponent(c.shortcut)}` : `https://wa.me/${d}`;
       const name = c.name || c.phone;
@@ -2528,18 +2524,9 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
         ${showWa ? `<a class="cbtn wa" href="${wa}" aria-label="WhatsApp ${esc(name)}">${icoWa}</a>` : ''}
         ${d ? `<a class="cbtn tel" href="tel:+${d}" aria-label="Chiama ${esc(name)}">${icoTel}</a>` : ''}
       </div>`;
-    }).join('') + (list.length < MAX_CONTACTS ? '<button class="contact add" id="addContact" type="button">+ Aggiungi contatto</button>' : '') + '</div>');
-    $('#addContact')?.addEventListener('click', () => addContactFromPanel());
+    }).join('') + '</div>');
     // mentre si scorre la lista i contatti restano aperti
     $('#cList').addEventListener('scroll', () => { if ($('#pContacts').classList.contains('open')) openContacts(true); }, { passive: true });
-  };
-  // «Aggiungi contatto»: apre le impostazioni su un contatto vuoto (nuovo, se non ce n'è uno libero)
-  const addContactFromPanel = () => {
-    openSettings(); showSec('contatti');
-    readContactsForm();
-    let i = draft.contacts.findIndex(c => !c.name && !c.phone && !c.shortcut);
-    if (i < 0) { draft.contacts.push({ name: '', phone: '', shortcut: '', mode: 'wa' }); i = draft.contacts.length - 1; fillContactsForm(); }
-    setTimeout(() => { const f = $('#cN' + i); scrollInside(f, $('.set-main')); }, 120);
   };
 
   // ---------- Ricerca destinazione (OpenStreetMap / Nominatim) ----------
