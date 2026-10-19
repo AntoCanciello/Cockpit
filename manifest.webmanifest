@@ -1,0 +1,10 @@
+{
+  "name": "Cockpit",
+  "short_name": "Cockpit",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07090d",
+  "theme_color": "#07090d",
+  "icons": [{ "src": "bmw-logo.png", "sizes": "392x392", "type": "image/png", "purpose": "any" }]
+}
