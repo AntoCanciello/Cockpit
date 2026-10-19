@@ -45,7 +45,8 @@ svg { display: block; }
 [hidden] { display: none !important; }
 
 /* ---------- Stage: ruota tutto di 90° se il browser è in verticale ---------- */
-#stage { position: fixed; top: 0; left: 0; transform-origin: 0 0; }
+#stage { position: fixed; inset: 0; transform-origin: 0 0; }
+#bootError { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 99; padding: 12px 14px; border-radius: 12px; background: #3b0d0d; color: #ffd7d7; font: 13px/1.4 -apple-system, system-ui, sans-serif; white-space: pre-wrap; }
 #stage.rot-r { --sl: env(safe-area-inset-top, 0px); --sr: env(safe-area-inset-bottom, 0px); --st: env(safe-area-inset-right, 0px); --sb: env(safe-area-inset-left, 0px); }
 #stage.rot-l { --sl: env(safe-area-inset-bottom, 0px); --sr: env(safe-area-inset-top, 0px); --st: env(safe-area-inset-left, 0px); --sb: env(safe-area-inset-right, 0px); }
 
@@ -488,6 +489,15 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   </div>
 </div>
 
+<script>
+  window.__bootError = e => {
+    let el = document.getElementById('bootError');
+    if (!el) { el = document.createElement('div'); el.id = 'bootError'; document.body.appendChild(el); el.addEventListener('click', () => el.remove()); }
+    el.textContent = 'Errore del Cockpit (mandalo a chi ti aiuta, tocca per chiudere):\n' + (e && (e.message || e.reason?.message || e.reason) || e);
+  };
+  window.addEventListener('error', e => window.__bootError(e.error || e.message));
+  window.addEventListener('unhandledrejection', e => window.__bootError(e.reason));
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (() => {
@@ -530,7 +540,8 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   const app = $('#app');
   let refreshMap = () => {};
   const layout = () => {
-    const w = innerWidth, h = innerHeight;
+    const w = innerWidth || document.documentElement.clientWidth, h = innerHeight || document.documentElement.clientHeight;
+    if (!w || !h) { setTimeout(layout, 120); return; } // all'avvio dalla Home iOS può dare 0
     const sheetOpen = $$('.sheet').some(s => !s.hidden);
     const rotate = h > w && cfg.rotate !== 'off' && !sheetOpen;
     stage.classList.toggle('rot-r', rotate && cfg.rotate === 'r');
@@ -542,14 +553,16 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       stage.style.height = w + 'px';
       stage.style.transform = cfg.rotate === 'r' ? `translate(${w}px,0) rotate(90deg)` : `translate(0,${h}px) rotate(-90deg)`;
     } else {
-      stage.style.width = w + 'px';
-      stage.style.height = h + 'px';
-      stage.style.transform = 'none';
+      stage.style.width = ''; stage.style.height = ''; stage.style.transform = ''; // lo fa il CSS: tutto schermo
     }
     refreshMap();
   };
   addEventListener('resize', layout);
   addEventListener('orientationchange', () => setTimeout(layout, 250));
+  addEventListener('pageshow', layout);
+  addEventListener('load', layout);
+  window.visualViewport?.addEventListener('resize', layout);
+  [150, 600, 1500].forEach(t => setTimeout(layout, t));
 
   // ---------- Navigazione tra le schermate ----------
   const setMode = mode => {
@@ -592,7 +605,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   let followPauseUntil = 0;
   let map = null, meMarker = null, destMarker = null, routeLine = null, routeCasing = null;
 
-  if (window.L) {
+  try { if (window.L) {
     map = L.map('map', { zoomControl: false, doubleClickZoom: 'center', touchZoom: 'center', scrollWheelZoom: 'center', inertia: false })
       .setView(pos ? [pos.lat, pos.lng] : [41.9, 12.5], pos ? 16 : 6);
     map.attributionControl.setPrefix(false);
@@ -632,7 +645,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     };
   } else {
     $('#map').innerHTML = '<div class="map-msg">Mappa non disponibile: controlla la connessione e riapri l\'app.</div>';
-  }
+  } } catch (e) { map = null; window.__bootError?.(e); }
 
   // ---------- Mappa di base: TomTom se c'è la chiave, altrimenti OpenStreetMap ----------
   let baseLayer = null;
