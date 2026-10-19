@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v71">
+<meta name="cockpit-version" content="2026-10-19 v72">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -609,7 +609,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v71</small>
+  <small style="opacity:.6">2026-10-19 v72</small>
 </div>
 <script>
   setTimeout(function () {
@@ -914,7 +914,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v71</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v72</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -1016,7 +1016,10 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     { name: 'Radio Deejay', url: STREAMS[0], site: 'deejay.it' },
     { name: 'Radio Capital', url: 'https://streamcdnb1-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/play1.m3u8', site: 'capital.it', alt: ['https://streamcdnm4-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/play1.m3u8'] },
     { name: 'm2o', url: 'https://streamcdnb1-4c4b867c89244861ac216426883d1ad0.msvdn.net/m2o/m2o/play1.m3u8', site: 'm2o.it', alt: ['https://streamcdnm4-4c4b867c89244861ac216426883d1ad0.msvdn.net/m2o/m2o/play1.m3u8'] },
-    { name: 'RTL 102.5', url: 'https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_audio.m3u8', site: 'rtl.it', alt: ['https://streamingv2.shoutcast.com/rtl-1025'] },
+    { name: 'RTL 102.5', url: 'https://streamcdnm3-dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_audio.m3u8', site: 'rtl.it', alt: [
+      'https://streamcdnb1-dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_audio.m3u8',
+      'https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_audio.m3u8',
+      'https://streamingv2.shoutcast.com/rtl-1025'] },
     { name: 'Radio 105', url: 'https://icy.unitedradio.it/Radio105.mp3', site: '105.net' },
     { name: 'Virgin Radio', url: 'https://icy.unitedradio.it/Virgin.mp3', site: 'virginradio.it' },
     { name: 'R101', url: 'https://icy.unitedradio.it/R101.mp3', site: 'r101.it' },
@@ -1025,7 +1028,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     { name: 'Radio Italia', url: 'https://radioitaliasmi.akamaized.net/hls/live/2093120/RISMI/stream01/streamPlaylist.m3u8', site: 'radioitalia.it', alt: ['https://radioitaliasmi.akamaized.net/hls/live/2093120/RISMI/master.m3u8'] },
     { name: 'Radio Kiss Kiss', url: 'https://ice07.fluidstream.net/KissKiss.mp3', site: 'kisskiss.it' },
     { name: 'Rai Radio 1', url: 'https://icestreaming.rai.it/1.mp3', site: 'raiplaysound.it' },
-    { name: 'Rai Radio 2', url: 'https://icestreaming.rai.it/2.mp3', site: 'raiplaysound.it' }
+    { name: 'Rai Radio 2', url: 'https://icestreaming.rai.it/2.mp3', site: 'raiplaysound.it' },
+    { name: 'Sky TG24', url: 'https://skyitalia-live.akamaized.net/hls/live/2036961/skytg24radio/master.m3u8', site: 'tg24.sky.it' }
   ].map(x => ({ logo: '', ...x }));
   const DEFAULTS = {
     vehicle: 'C 400 GT', brandLogo: '', modelLogo: '',
@@ -1052,7 +1056,14 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch { /* spazio pieno o storage bloccato */ } };
   let cfg = load();
   // una volta sola: aggiungiamo le radio italiane a quelle già salvate (senza doppioni; quelle tolte non tornano)
+  if (cfg.radioItV1 && !cfg.radioItV2) {
+    const have = new Set((cfg.stations || []).map(st => st.name.toLowerCase()));
+    cfg.stations = [...(cfg.stations || []), ...RADIO_IT.filter(st => st.name === 'Sky TG24' && !have.has('sky tg24'))];
+    cfg.radioItV2 = true;
+    try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch { /* storage pieno */ }
+  }
   if (!cfg.radioItV1) {
+    cfg.radioItV2 = true;
     const have = new Set((cfg.stations || []).map(st => st.name.toLowerCase()));
     cfg.stations = [...(cfg.stations || []), ...RADIO_IT.filter(st => !have.has(st.name.toLowerCase()))];
     cfg.radioItV1 = true;
@@ -2023,12 +2034,25 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   const streamList = () => {
     const st = curStation(), m = streamMemo()[st.name] || {};
     const known = RADIO_IT.find(x => x.name.toLowerCase() === st.name.toLowerCase());
-    const base = /radiodeejay/i.test(st.url) ? [st.url, ...STREAMS] : [known && known.url, st.url, ...((known && known.alt) || [])];
-    return [...new Set([m.good, ...base, ...(m.found || [])].filter(Boolean))];
+    if (/radiodeejay/i.test(st.url)) return [...new Set([m.good, st.url, ...STREAMS, ...(m.found || [])].filter(Boolean))];
+    // ordine: quello che ha funzionato, il principale, quelli dell'archivio radio-browser (controllati di continuo), poi le altre riserve
+    return [...new Set([m.good, (known && known.url) || st.url, ...(m.found || []), st.url, ...((known && known.alt) || [])].filter(Boolean))];
   };
   const lookupStreams = async st => {
-    const r = await fetchT(`https://de1.api.radio-browser.info/json/stations/search?name=${encodeURIComponent(st.name)}&countrycode=IT&hidebroken=true&order=clickcount&reverse=true&limit=8`);
-    const found = (await r.json()).map(x => x.url_resolved || x.url).filter(u => /^https:/.test(u || ''));
+    let found = [], reached = false;
+    for (const host of ['de1', 'nl1', 'at1']) {
+      try {
+        for (const country of ['&countrycode=IT', '']) {
+          const r = await fetchT(`https://${host}.api.radio-browser.info/json/stations/search?name=${encodeURIComponent(st.name)}${country}&hidebroken=true&order=clickcount&reverse=true&limit=10`, 6000);
+          found = (await r.json()).map(x => x.url_resolved || x.url).filter(u => /^https:/.test(u || ''));
+          reached = true;
+          if (found.length) break;
+        }
+        break;
+      } catch { /* questo server dell'archivio non risponde: proviamo il successivo */ }
+    }
+    if (!reached) throw new Error('archivio radio non raggiungibile');
+    diag(`radio ${st.name}: radio-browser ha ${found.length} indirizzi sicuri`);
     const all = streamMemo(); all[st.name] = { ...(all[st.name] || {}), found: [...new Set(found)].slice(0, 5) };
     try { localStorage.setItem(STREAM_KEY, JSON.stringify(all)); } catch { /* storage pieno */ }
     return found.length;
@@ -2109,7 +2133,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     live = false; tryAt = Date.now();
     audio.src = url;
     audio.play().catch(() => {});
-    setStatus(label); watch(8000);
+    setStatus(label); watch(label === 'Altro server…' ? 6000 : 8000);
     diag(`radio ${curStation().name}: provo ${url.split('/')[2]}`);
   };
   const playRadio = () => {
