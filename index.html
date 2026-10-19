@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v65">
+<meta name="cockpit-version" content="2026-10-19 v66">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -265,12 +265,12 @@ main {
 @keyframes pulse { 50% { opacity: .35; } }
 .radio-ctrl { display: flex; align-items: center; gap: 22px; }
 /* onda sonora animata: si muove mentre la radio suona, in pausa diventa una fila di puntini */
-.wave { position: relative; flex: 1 1 auto; align-self: stretch; min-height: 54px; max-height: 120px; width: 100%; display: block; border-radius: 16px; }
+.wave { position: relative; flex: 1 1 auto; align-self: center; min-height: 54px; max-height: 120px; width: 80%; display: block; border-radius: 16px; }
 .wave canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .wave-hint { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.55); letter-spacing: .3px; transition: opacity .3s; pointer-events: none; }
 #pRadio.playing .wave-hint { opacity: 0; }
 #stage.land #app[data-mode="home"] .wave { margin-block: auto; max-height: 96px; }
-#app[data-mode="radio"] .wave { max-height: 200px; min-height: 120px; max-width: 760px; margin-inline: auto; }
+#app[data-mode="radio"] .wave { max-height: 200px; min-height: 120px; max-width: 600px; margin-inline: auto; }
 #stage:not(.land) #app[data-mode="home"] .wave { min-height: 48px; max-height: 64px; }
 #stage:not(.land) #app[data-mode="home"] .wave-hint { bottom: 0; font-size: 11px; }
 .rbtn { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--panel-2); color: var(--fg); flex: 0 0 auto; }
@@ -608,7 +608,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v65</small>
+  <small style="opacity:.6">2026-10-19 v66</small>
 </div>
 <script>
   setTimeout(function () {
@@ -913,7 +913,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v65</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v66</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -2109,7 +2109,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   };
   const stopRadio = () => {
     wantPlay = false;
-    audio.pause();
+    try { audio.pause(); } catch { /* già fermo */ }
     audio.removeAttribute('src'); audio.load(); // in diretta: alla ripresa riparte dal live
     setPlayingUI(false); setStatus('In pausa');
   };
@@ -2158,7 +2158,16 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
     };
     box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
   }
-  $('#play').addEventListener('click', () => (wantPlay ? stopRadio() : playRadio()));
+  // play / pausa: guardiamo anche se l'audio sta suonando davvero; un secondo tocco entro 0,4 s viene ignorato
+  let lastToggle = 0;
+  const toggleRadio = () => {
+    if (Date.now() - lastToggle < 400) return;
+    lastToggle = Date.now();
+    const on = wantPlay || !audio.paused;
+    diag(on ? 'radio: pausa' : 'radio: play');
+    if (on) stopRadio(); else playRadio();
+  };
+  $('#play').addEventListener('click', toggleRadio);
   // ---------- Onda sonora (animazione: su iPhone una pagina web non può leggere il suono di una radio di un altro sito) ----------
   const wave = { amp: 0, target: 0, raf: 0 };
   const waveCv = $('#waveCv'), waveCtx = waveCv.getContext('2d');
@@ -2214,8 +2223,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   new ResizeObserver(kickWave).observe(waveCv);
   document.addEventListener('visibilitychange', kickWave);
   // un tocco sull'onda o sul logo: play / pausa
-  $('#wave').addEventListener('click', () => $('#play').click());
-  $('#stLogo').addEventListener('click', () => $('#play').click());
+  $('#wave').addEventListener('click', toggleRadio);
+  $('#stLogo').addEventListener('click', toggleRadio);
   $('#prevSt').addEventListener('click', () => switchStation(-1));
   $('#nextSt').addEventListener('click', () => switchStation(1));
   audio.addEventListener('playing', () => {
