@@ -174,7 +174,7 @@ main {
 .hint { font-size: 13px; color: var(--muted); }
 
 /* ---------- Pannelli a tutto schermo (impostazioni, ricerca) ---------- */
-.sheet { position: absolute; inset: 0; z-index: 30; background: var(--bg); overflow-y: auto; -webkit-overflow-scrolling: touch; -webkit-user-select: text; user-select: text;
+.sheet { position: absolute; inset: 0; z-index: 30; background: var(--bg); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; -webkit-user-select: text; user-select: text;
   padding: max(16px, var(--st)) max(16px, var(--sr)) max(24px, var(--sb)) max(16px, var(--sl)); }
 .sheet-inner { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
 .sheet header { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: var(--bg); padding-block: 6px; z-index: 1; }
@@ -188,7 +188,13 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
 .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
 .check { flex-direction: row; align-items: center; gap: 10px; color: var(--fg); font-size: 16px; }
 .check input { width: 24px; height: 24px; }
-.logo-slot { display: flex; align-items: center; gap: 12px; }
+.logo-slot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.logo-slot label { min-width: 0; }
+input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--muted); }
+.contact-edit { display: flex; flex-direction: column; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.contact-edit:last-child { border-bottom: 0; padding-bottom: 0; }
+.contact-edit h3 { margin: 0; font-size: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pick { height: 40px; padding: 0 14px; border-radius: 12px; background: var(--panel-2); color: var(--accent); font-weight: 600; font-size: 14px; }
 .logo-prev { width: 64px; height: 64px; border-radius: 14px; background: var(--panel-2) center/contain no-repeat; border: 1px dashed var(--line); flex: 0 0 auto; }
 .note { font-size: 13px; color: var(--muted); line-height: 1.45; margin: 0; }
 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -334,7 +340,7 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
 
   <!-- IMPOSTAZIONI -->
   <div class="sheet" id="settingsSheet" hidden>
-    <form class="sheet-inner" id="settingsForm" autocomplete="off">
+    <form class="sheet-inner" id="settingsForm">
       <header>
         <h1>Impostazioni</h1>
         <button class="btn primary" type="submit">Salva</button>
@@ -364,8 +370,9 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
 
       <fieldset>
         <legend>Contatti preferiti</legend>
+        <p class="note"><b>Prendere un contatto dalla rubrica:</b> tocca il campo «Nome» e, sopra la tastiera, tocca <b>«Compila automaticamente contatto»</b> (o l'icona della rubrica): scegli la persona e nome e numero si compilano da soli.</p>
         <div id="sContacts" style="display:flex;flex-direction:column;gap:14px"></div>
-        <p class="note">Il tasto verde apre la chat WhatsApp: da lì tocchi l'icona del telefono. Per chiamare su WhatsApp con un solo tocco, crea nell'app Comandi un comando «Chiama» → contatto → WhatsApp, e scrivi qui il suo nome esatto.</p>
+        <p class="note">Per ogni contatto scegli se mostrare WhatsApp e chiamata, o solo la chiamata normale. Il tasto verde apre la chat WhatsApp; per chiamare su WhatsApp con un solo tocco crea nell'app Comandi un comando «Chiama» → contatto → WhatsApp e scrivi qui il suo nome esatto.</p>
       </fieldset>
 
       <fieldset>
@@ -418,9 +425,9 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
     rotate: 'r', follow: true, autoplay: false,
     stream: STREAMS[0], home: '', work: '',
     contacts: [
-      { name: '', phone: '', shortcut: '' },
-      { name: '', phone: '', shortcut: '' },
-      { name: '', phone: '', shortcut: '' }
+      { name: '', phone: '', shortcut: '', mode: 'wa' },
+      { name: '', phone: '', shortcut: '', mode: 'wa' },
+      { name: '', phone: '', shortcut: '', mode: 'wa' }
     ]
   };
   const KEY = 'cockpit.v1';
@@ -589,10 +596,12 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
       const d = digits(c.phone);
       const wa = c.shortcut ? `shortcuts://run-shortcut?name=${encodeURIComponent(c.shortcut)}` : `https://wa.me/${d}`;
       const name = c.name || c.phone;
+      const showWa = c.mode !== 'tel' && (d || c.shortcut);
+      const sub = c.mode === 'tel' ? 'Telefono' : c.shortcut ? 'WhatsApp · chiamata diretta' : 'WhatsApp e telefono';
       return `<div class="contact">
         <div class="avatar">${esc(initials(name))}</div>
-        <div class="name">${esc(name)}<small>${c.shortcut ? 'WhatsApp · chiamata diretta' : 'WhatsApp'}</small></div>
-        ${(d || c.shortcut) ? `<a class="cbtn wa" href="${wa}" aria-label="WhatsApp ${esc(name)}">${icoWa}</a>` : ''}
+        <div class="name">${esc(name)}<small>${sub}</small></div>
+        ${showWa ? `<a class="cbtn wa" href="${wa}" aria-label="WhatsApp ${esc(name)}">${icoWa}</a>` : ''}
         ${d ? `<a class="cbtn tel" href="tel:+${d}" aria-label="Chiama ${esc(name)}">${icoTel}</a>` : ''}
       </div>`;
     }).join('');
@@ -623,12 +632,33 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
   const settingsSheet = $('#settingsSheet');
   let draft = null;
   const fillContactsForm = () => {
+    const canPick = 'contacts' in navigator && typeof navigator.contacts.select === 'function';
     $('#sContacts').innerHTML = draft.contacts.map((c, i) => `
-      <div class="row">
-        <label for="cN${i}">Contatto ${i + 1} · nome<input type="text" id="cN${i}" value="${esc(c.name)}" placeholder="Es. Marco"></label>
-        <label for="cP${i}">Numero<input type="tel" id="cP${i}" value="${esc(c.phone)}" placeholder="Es. 333 1234567"></label>
-        <label for="cS${i}">Comando rapido (facoltativo)<input type="text" id="cS${i}" value="${esc(c.shortcut)}" placeholder="Es. Chiama Marco WA"></label>
+      <div class="contact-edit">
+        <h3>Contatto ${i + 1}${canPick ? `<button type="button" class="pick" data-pick="${i}">Scegli dalla rubrica</button>` : ''}</h3>
+        <div class="row">
+          <label for="cN${i}">Nome<input type="text" id="cN${i}" name="c${i}-name" autocomplete="section-c${i} name" value="${esc(c.name)}" placeholder="Es. Marco"></label>
+          <label for="cP${i}">Numero<input type="tel" id="cP${i}" name="c${i}-tel" autocomplete="section-c${i} tel" value="${esc(c.phone)}" placeholder="Es. 333 1234567"></label>
+        </div>
+        <div class="row">
+          <label for="cM${i}">Tasti da mostrare
+            <select id="cM${i}">
+              <option value="wa"${c.mode !== 'tel' ? ' selected' : ''}>WhatsApp + chiamata</option>
+              <option value="tel"${c.mode === 'tel' ? ' selected' : ''}>Solo chiamata</option>
+            </select>
+          </label>
+          <label for="cS${i}">Comando rapido WhatsApp (facoltativo)<input type="text" id="cS${i}" autocomplete="off" value="${esc(c.shortcut)}" placeholder="Es. Chiama Marco WA"></label>
+        </div>
       </div>`).join('');
+    $$('[data-pick]').forEach(b => b.addEventListener('click', async () => {
+      const i = b.dataset.pick;
+      try {
+        const [ct] = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+        if (!ct) return;
+        if (ct.name && ct.name[0]) $('#cN' + i).value = ct.name[0];
+        if (ct.tel && ct.tel[0]) $('#cP' + i).value = ct.tel[0];
+      } catch { /* annullato o non permesso */ }
+    }));
   };
   const showLogoPrev = () => {
     $('#prevBrand').style.backgroundImage = draft.brandLogo ? `url("${draft.brandLogo}")` : 'none';
@@ -678,7 +708,7 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
     draft.autoplay = $('#sAutoplay').checked;
     draft.stream = $('#sStream').value.trim() || STREAMS[0];
     draft.contacts = draft.contacts.map((_, i) => ({
-      name: $('#cN' + i).value.trim(), phone: $('#cP' + i).value.trim(), shortcut: $('#cS' + i).value.trim()
+      name: $('#cN' + i).value.trim(), phone: $('#cP' + i).value.trim(), shortcut: $('#cS' + i).value.trim(), mode: $('#cM' + i).value
     }));
     cfg = draft; save();
     renderBrand(); renderContacts();
