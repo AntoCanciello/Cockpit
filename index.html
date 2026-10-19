@@ -12,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v92">
+<meta name="cockpit-version" content="2026-10-19 v93">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <!-- schermata che iOS mostra mentre apre l'app dalla Home: lo stesso sfondo dell'introduzione, così non c'è nessun lampo -->
@@ -46,6 +46,24 @@
 <link rel="apple-touch-startup-image" media="screen and (device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)" href="splash/1136x640.png">
 <title>Cockpit C 400 GT</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" media="print" onload="this.media='all'">
+</head>
+<body>
+<div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(70% 70% at 50% 50%,#142036,#07090d 70%);color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
+  <div id="bootMsg" style="visibility:hidden">Avvio Cockpit…</div>
+  <small id="bootVer" style="opacity:.6;visibility:hidden">2026-10-19 v93</small>
+</div>
+<script>
+  // la scritta «Avvio Cockpit…» compare solo se l'avvio va per le lunghe (prima era un lampo prima dell'introduzione)
+  setTimeout(function () { var m = document.getElementById('bootMsg'), v = document.getElementById('bootVer'); if (m) m.style.visibility = v.style.visibility = 'visible'; }, 2500);
+  setTimeout(function () {
+    var b = document.getElementById('boot');
+    if (!b) return;
+    document.getElementById('bootMsg').style.visibility = 'visible';
+    document.getElementById('bootMsg').innerHTML = 'Il Cockpit non è partito.<br><b style="color:#fff">Tocca qui per ricaricare</b>';
+    b.onclick = function () { location.reload(); };
+  }, 6000);
+</script>
+<!-- lo stile completo arriva dopo la schermata di avvio: così il telefono disegna subito lo sfondo scuro -->
 <style>
 /* Layout: barra laterale fissa + griglia a 3 pannelli (mappa grande a sinistra, radio e contatti a destra).
    Tema scuro unico, voluto: si legge meglio di notte e non abbaglia; contrasti alti per il sole. */
@@ -692,23 +710,6 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
-</head>
-<body>
-<div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(70% 70% at 50% 50%,#142036,#07090d 70%);color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
-  <div id="bootMsg" style="visibility:hidden">Avvio Cockpit…</div>
-  <small id="bootVer" style="opacity:.6;visibility:hidden">2026-10-19 v92</small>
-</div>
-<script>
-  // la scritta «Avvio Cockpit…» compare solo se l'avvio va per le lunghe (prima era un lampo prima dell'introduzione)
-  setTimeout(function () { var m = document.getElementById('bootMsg'), v = document.getElementById('bootVer'); if (m) m.style.visibility = v.style.visibility = 'visible'; }, 2500);
-  setTimeout(function () {
-    var b = document.getElementById('boot');
-    if (!b) return;
-    document.getElementById('bootMsg').style.visibility = 'visible';
-    document.getElementById('bootMsg').innerHTML = 'Il Cockpit non è partito.<br><b style="color:#fff">Tocca qui per ricaricare</b>';
-    b.onclick = function () { location.reload(); };
-  }, 6000);
-</script>
 <div id="stage">
   <div id="app" data-mode="home">
     <aside class="rail">
@@ -1024,7 +1025,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v92</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v93</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
