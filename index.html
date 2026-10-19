@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v70">
+<meta name="cockpit-version" content="2026-10-19 v71">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -609,7 +609,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v70</small>
+  <small style="opacity:.6">2026-10-19 v71</small>
 </div>
 <script>
   setTimeout(function () {
@@ -914,7 +914,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v70</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v71</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -1014,15 +1014,15 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   // Radio italiane già pronte (se un indirizzo smette di funzionare, l'app cerca quello nuovo su radio-browser.info)
   const RADIO_IT = [
     { name: 'Radio Deejay', url: STREAMS[0], site: 'deejay.it' },
-    { name: 'Radio Capital', url: 'https://streamcdnb1-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/play1.m3u8', site: 'capital.it' },
-    { name: 'm2o', url: 'https://streamcdnb1-4c4b867c89244861ac216426883d1ad0.msvdn.net/m2o/m2o/play1.m3u8', site: 'm2o.it' },
-    { name: 'RTL 102.5', url: 'https://streamingv2.shoutcast.com/rtl-1025', site: 'rtl.it' },
+    { name: 'Radio Capital', url: 'https://streamcdnb1-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/play1.m3u8', site: 'capital.it', alt: ['https://streamcdnm4-4c4b867c89244861ac216426883d1ad0.msvdn.net/radiocapital/radiocapital/play1.m3u8'] },
+    { name: 'm2o', url: 'https://streamcdnb1-4c4b867c89244861ac216426883d1ad0.msvdn.net/m2o/m2o/play1.m3u8', site: 'm2o.it', alt: ['https://streamcdnm4-4c4b867c89244861ac216426883d1ad0.msvdn.net/m2o/m2o/play1.m3u8'] },
+    { name: 'RTL 102.5', url: 'https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_audio.m3u8', site: 'rtl.it', alt: ['https://streamingv2.shoutcast.com/rtl-1025'] },
     { name: 'Radio 105', url: 'https://icy.unitedradio.it/Radio105.mp3', site: '105.net' },
     { name: 'Virgin Radio', url: 'https://icy.unitedradio.it/Virgin.mp3', site: 'virginradio.it' },
     { name: 'R101', url: 'https://icy.unitedradio.it/R101.mp3', site: 'r101.it' },
     { name: 'Radio Monte Carlo', url: 'https://icy.unitedradio.it/RMC.mp3', site: 'radiomontecarlo.net' },
-    { name: 'RDS', url: 'https://icstream.rds.radio/rds', site: 'rds.it' },
-    { name: 'Radio Italia', url: 'https://radioitaliasmi.akamaized.net/hls/live/2093120/RISMI/master.m3u8', site: 'radioitalia.it' },
+    { name: 'RDS', url: 'https://stream.rds.radio/audio/rds.stream_aac64/playlist.m3u8', site: 'rds.it', alt: ['https://icstream.rds.radio/rds'] },
+    { name: 'Radio Italia', url: 'https://radioitaliasmi.akamaized.net/hls/live/2093120/RISMI/stream01/streamPlaylist.m3u8', site: 'radioitalia.it', alt: ['https://radioitaliasmi.akamaized.net/hls/live/2093120/RISMI/master.m3u8'] },
     { name: 'Radio Kiss Kiss', url: 'https://ice07.fluidstream.net/KissKiss.mp3', site: 'kisskiss.it' },
     { name: 'Rai Radio 1', url: 'https://icestreaming.rai.it/1.mp3', site: 'raiplaysound.it' },
     { name: 'Rai Radio 2', url: 'https://icestreaming.rai.it/2.mp3', site: 'raiplaysound.it' }
@@ -2022,7 +2022,8 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   const streamMemo = () => { try { return JSON.parse(localStorage.getItem(STREAM_KEY) || '{}'); } catch { return {}; } };
   const streamList = () => {
     const st = curStation(), m = streamMemo()[st.name] || {};
-    const base = /radiodeejay/i.test(st.url) ? [st.url, ...STREAMS] : [st.url];
+    const known = RADIO_IT.find(x => x.name.toLowerCase() === st.name.toLowerCase());
+    const base = /radiodeejay/i.test(st.url) ? [st.url, ...STREAMS] : [known && known.url, st.url, ...((known && known.alt) || [])];
     return [...new Set([m.good, ...base, ...(m.found || [])].filter(Boolean))];
   };
   const lookupStreams = async st => {
@@ -2101,15 +2102,28 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
       try { navigator.mediaSession.metadata = new MediaMetadata({ title: st.name, artist: 'In diretta', artwork: src ? [{ src, sizes: '256x256' }] : [] }); } catch { /* metadati non supportati */ }
     }
   }
+  // ogni indirizzo ha 8 secondi per partire; se non parte (o si blocca per 15 s) passiamo al successivo
+  let watchdog = 0, tryAt = 0, live = false;
+  const watch = ms => { clearTimeout(watchdog); watchdog = setTimeout(() => { if (wantPlay) failover(live ? 'bloccata' : 'non parte'); }, ms); };
+  const tryStream = (url, label) => {
+    live = false; tryAt = Date.now();
+    audio.src = url;
+    audio.play().catch(() => {});
+    setStatus(label); watch(8000);
+    diag(`radio ${curStation().name}: provo ${url.split('/')[2]}`);
+  };
   const playRadio = () => {
     wantPlay = true;
     const list = streamList();
-    if (!audio.src || !list.includes(audio.src)) { streamIdx = 0; audio.src = list[0]; }
-    setStatus('Connessione…'); setWave(.35);
-    audio.play().catch(() => { setStatus('Tocca play'); setWave(0); });
+    setWave(.35);
+    if (!audio.src || !list.includes(audio.src)) { streamIdx = 0; tryStream(list[0], 'Connessione…'); }
+    else { live = false; tryAt = Date.now(); setStatus('Connessione…'); watch(8000); audio.play().catch(() => { setStatus('Tocca play'); setWave(0); }); }
+    // se di questa stazione non conosciamo ancora un indirizzo funzionante, prepariamo subito quelli di riserva
+    const st = curStation();
+    if (!(streamMemo()[st.name] || {}).good && !looked.has(st.name)) { looked.add(st.name); lookupStreams(st).catch(() => {}); }
   };
   const stopRadio = () => {
-    wantPlay = false;
+    wantPlay = false; clearTimeout(watchdog); live = false;
     try { audio.pause(); } catch { /* già fermo */ }
     audio.removeAttribute('src'); audio.load(); // in diretta: alla ripresa riparte dal live
     setPlayingUI(false); setStatus('In pausa');
@@ -2229,32 +2243,37 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   $('#prevSt').addEventListener('click', () => switchStation(-1));
   $('#nextSt').addEventListener('click', () => switchStation(1));
   audio.addEventListener('playing', () => {
+    clearTimeout(watchdog);
+    if (!live && tryAt) diag(`radio ${curStation().name}: in diretta in ${((Date.now() - tryAt) / 1000).toFixed(1)} s (${audio.src.split('/')[2]})`);
+    live = true;
     setPlayingUI(true); setStatus('In diretta', true);
     // ricordiamo l'indirizzo che funziona, così la prossima volta parte subito
     const st = curStation(), all = streamMemo();
     if (audio.src && (all[st.name] || {}).good !== audio.src) { all[st.name] = { ...(all[st.name] || {}), good: audio.src }; try { localStorage.setItem(STREAM_KEY, JSON.stringify(all)); } catch { /* storage pieno */ } }
   });
-  audio.addEventListener('waiting', () => wantPlay && setStatus('Caricamento…'));
+  audio.addEventListener('waiting', () => { if (!wantPlay) return; setStatus('Caricamento…'); if (live) watch(15000); });
   audio.addEventListener('pause', () => { if (!wantPlay) setPlayingUI(false); });
-  audio.addEventListener('error', () => {
+  function failover(why) {
     if (!wantPlay) return;
+    diag(`radio ${curStation().name}: ${why} (${audio.src.split('/')[2] || '-'})`);
     const list = streamList();
     streamIdx++;
-    if (streamIdx < list.length) { audio.src = list[streamIdx]; audio.play().catch(() => {}); setStatus('Altro server…'); return; }
-    // nessun indirizzo funziona: una volta per stazione cerchiamo quelli aggiornati
+    if (streamIdx < list.length) { tryStream(list[streamIdx], 'Altro server…'); return; }
+    // finiti gli indirizzi: se la ricerca su radio-browser ne ha trovati di nuovi li proviamo, altrimenti la cerchiamo ora
     const st = curStation();
-    if (!looked.has(st.name)) {
-      looked.add(st.name); setStatus('Cerco l\'indirizzo aggiornato…');
-      lookupStreams(st).then(n => {
+    const giveUp = () => { clearTimeout(watchdog); wantPlay = false; setPlayingUI(false); setStatus('Non raggiungibile'); diag(`radio ${st.name}: non raggiungibile`); };
+    if (!looked.has(st.name + '!')) {
+      looked.add(st.name + '!'); setStatus('Cerco l\'indirizzo aggiornato…'); clearTimeout(watchdog);
+      lookupStreams(st).then(() => {
         if (!wantPlay || curStation() !== st) return;
         const fresh = streamList();
-        if (n && fresh.length > list.length) { streamIdx = list.length; audio.src = fresh[streamIdx]; audio.play().catch(() => {}); }
-        else { wantPlay = false; setPlayingUI(false); setStatus('Non raggiungibile'); }
-      }).catch(() => { wantPlay = false; setPlayingUI(false); setStatus('Non raggiungibile'); });
+        if (fresh.length > list.length) { streamIdx = list.length; tryStream(fresh[streamIdx], 'Altro server…'); } else giveUp();
+      }).catch(giveUp);
       return;
     }
-    wantPlay = false; setPlayingUI(false); setStatus('Non raggiungibile');
-  });
+    giveUp();
+  }
+  audio.addEventListener('error', () => failover('errore'));
   if ('mediaSession' in navigator) {
     const h = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch { /* azione non supportata */ } };
     h('play', playRadio); h('pause', stopRadio);
