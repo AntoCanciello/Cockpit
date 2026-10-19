@@ -284,7 +284,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v9</small>
+  <small style="opacity:.6">2026-10-19 v10</small>
 </div>
 <script>
   setTimeout(function () {
@@ -415,7 +415,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   <div class="sheet" id="settingsSheet" hidden>
     <form class="sheet-inner" id="settingsForm">
       <header>
-        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v9</small></h1>
+        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v10</small></h1>
         <button class="btn primary" type="submit">Salva</button>
       </header>
 
@@ -1000,21 +1000,55 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     $('#icoPlay').toggleAttribute('hidden', on); $('#icoPause').toggleAttribute('hidden', !on);
     $('#play').setAttribute('aria-label', on ? 'Pausa' : 'Play');
   };
-  // Logo automatico preso dal sito della radio (se non ne hai caricato uno)
-  const autoLogo = st => {
-    const site = (st.site || (/radiodeejay/i.test(st.url) ? 'deejay.it' : '')).trim().replace(/^https?:\/\//, '').split('/')[0];
-    return site ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site)}&sz=256` : '';
+  // Logo automatico: proviamo più fonti finché troviamo un'immagine abbastanza grande
+  const LOGO_CACHE = 'cockpit.logos';
+  const logoCache = () => { try { return JSON.parse(localStorage.getItem(LOGO_CACHE) || '{}'); } catch { return {}; } };
+  const siteOf = st => (st.site || (/radiodeejay/i.test(st.url) ? 'deejay.it' : '')).trim().replace(/^https?:\/\//, '').split('/')[0];
+  const logoCandidates = async st => {
+    const site = siteOf(st), list = [];
+    if (site) {
+      const host = site.startsWith('www.') ? site : 'www.' + site;
+      list.push(`https://${host}/apple-touch-icon.png`, `https://${host}/apple-touch-icon-precomposed.png`);
+    }
+    try { // archivio pubblico di radio-browser.info
+      const r = await fetch(`https://de1.api.radio-browser.info/json/stations/byname/${encodeURIComponent(st.name)}?limit=8&order=clickcount&reverse=true&hidebroken=true`);
+      if (r.ok) (await r.json()).forEach(x => { if (x.favicon && /^https:/.test(x.favicon)) list.push(x.favicon); });
+    } catch { /* archivio non raggiungibile */ }
+    if (site) list.push(`https://www.google.com/s2/favicons?domain=${encodeURIComponent(site)}&sz=256`);
+    return [...new Set(list)];
   };
+  const probe = src => new Promise(ok => {
+    const img = new Image();
+    img.onload = () => ok(img.naturalWidth >= 96 ? src : null);
+    img.onerror = () => ok(null);
+    img.src = src;
+    setTimeout(() => ok(null), 6000);
+  });
+  let logoJob = 0;
   function renderStation() {
     const st = curStation();
-    const src = st.logo || autoLogo(st);
+    const showImg = src => { $('#stLogo').innerHTML = `<img src="${src}" alt="${esc(st.name)}">`; };
     const textLogo = () => { $('#stLogo').innerHTML = `<span>${esc(st.name)}</span>`; };
-    if (src) {
-      $('#stLogo').innerHTML = `<img src="${src}" alt="${esc(st.name)}">`;
-      const img = $('#stLogo img');
-      img.onerror = textLogo;
-      img.onload = () => { if (!st.logo && img.naturalWidth < 48) textLogo(); }; // icona generica: meglio il nome
-    } else textLogo();
+    const job = ++logoJob;
+    const key = st.name + '|' + siteOf(st);
+    const cached = logoCache()[key];
+    if (st.logo) showImg(st.logo);
+    else if (cached) showImg(cached);
+    else {
+      textLogo();
+      (async () => {
+        for (const src of await logoCandidates(st)) {
+          if (job !== logoJob) return;
+          if (await probe(src)) {
+            if (job !== logoJob) return;
+            showImg(src);
+            try { const c = logoCache(); c[key] = src; localStorage.setItem(LOGO_CACHE, JSON.stringify(c)); } catch { /* storage pieno */ }
+            return;
+          }
+        }
+      })();
+    }
+    const src = st.logo || cached || '';
     $('#stName').textContent = st.name;
     const many = stations().length > 1;
     $('#prevSt').disabled = !many; $('#nextSt').disabled = !many;
