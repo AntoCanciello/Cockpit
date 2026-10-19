@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v85">
+<meta name="cockpit-version" content="2026-10-19 v86">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -259,14 +259,13 @@ main {
 /* pagina «Casa»: entra dal basso mentre la radio sale e sfuma */
 #pRadio > .st-logo, #pRadio > .st-meta, #pRadio > .wave { transition: opacity .25s ease, translate .34s cubic-bezier(.2,.8,.2,1); }
 #pRadio.act > .st-logo, #pRadio.act > .st-meta, #pRadio.act > .wave { opacity: 0; translate: 0 -36px; pointer-events: none; }
-.rpage-act { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 12px 28px 12px 12px; opacity: 0; translate: 0 48px; pointer-events: none; transition: opacity .22s ease, translate .34s cubic-bezier(.2,.8,.2,1); }
+.rpage-act { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 12px 28px; opacity: 0; translate: 0 48px; pointer-events: none; transition: opacity .22s ease, translate .34s cubic-bezier(.2,.8,.2,1); }
 #pRadio.act .rpage-act { opacity: 1; translate: none; pointer-events: auto; transition-delay: .06s; }
 .act-btn { width: 84px; height: 84px; border-radius: 24px; display: grid; place-items: center; color: #fff; background: linear-gradient(150deg, #4f7cff, #7a4dff); border: 1.5px solid rgba(190,200,255,.45); box-shadow: inset 0 0 16px rgba(255,255,255,.14), 0 8px 22px rgba(0,0,0,.35); -webkit-tap-highlight-color: transparent; -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none; transition: transform .15s; }
 .act-btn:active { transform: scale(.93); }
 .act-btn svg { width: 42px; height: 42px; }
 .act-txt { text-align: center; min-width: 0; }
 .act-txt b { display: block; font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.act-txt small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
 .act-btn.sent { animation: actSent .9s ease; }
 @keyframes actSent { 30% { box-shadow: 0 0 0 10px rgba(122,77,255,.35), 0 8px 22px rgba(0,0,0,.35); } }
 /* puntini verticali a destra: in quale pagina siamo */
@@ -654,7 +653,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v85</small>
+  <small style="opacity:.6">2026-10-19 v86</small>
 </div>
 <script>
   setTimeout(function () {
@@ -777,7 +776,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
         <!-- seconda pagina (swipe in su): pulsante che avvia il comando «Casa» dell'app Comandi -->
         <div class="rpage-act" id="actPage" aria-hidden="true">
           <a class="act-btn" id="actBtn" href="#" draggable="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10.5h13V9"/><path d="M9.5 19.5v-5a2.5 2.5 0 0 1 5 0v5"/></svg></a>
-          <div class="act-txt"><b id="actLabel"></b><small id="actSub"></small></div>
+          <div class="act-txt"><b id="actLabel"></b></div>
         </div>
         <div class="rdots" aria-hidden="true"><i class="on"></i><i></i></div>
       </section>
@@ -976,7 +975,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v85</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v86</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -2338,7 +2337,6 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   function renderAct() {
     const name = (cfg.actName || '').trim();
     $('#actLabel').textContent = cfg.actLabel || 'Casa';
-    $('#actSub').textContent = name ? 'Avvia «' + name + '»' : 'Scegli il comando nelle impostazioni';
     $('#actBtn').href = name ? 'shortcuts://run-shortcut?name=' + encodeURIComponent(name) : '#';
     $('#actBtn').setAttribute('aria-label', (cfg.actLabel || 'Casa') + (name ? ': avvia il comando ' + name : ''));
   }
