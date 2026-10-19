@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v80">
+<meta name="cockpit-version" content="2026-10-19 v81">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -400,8 +400,8 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 #stage { --edge: 6px; --screen-r: 55px; --outer-r: calc(var(--screen-r) - var(--edge)); }
 #stage.land #app { gap: 8px; padding: var(--edge) max(var(--edge), env(safe-area-inset-right, 0px)) var(--edge) max(var(--edge), env(safe-area-inset-left, 0px)); }
 #stage.land main { gap: 8px; }
-/* radio in orizzontale: logo più grande e più in alto, tasti centrati nello spazio sotto */
-#stage.land #app[data-mode="home"] #pRadio { justify-content: flex-start; padding-top: 12px; }
+/* radio in orizzontale: logo più grande in alto (staccato un po' dal bordo), onda centrata nello spazio sotto */
+#stage.land #app[data-mode="home"] #pRadio { justify-content: flex-start; padding-top: 22px; }
 #stage.land #app[data-mode="home"] .st-logo { width: 74px; height: 74px; border-radius: 18px; }
 #stage.land #app[data-mode="home"] .radio-ctrl { margin-block: auto; }
 #stage.land .rail nav { gap: 2px; }
@@ -612,7 +612,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v80</small>
+  <small style="opacity:.6">2026-10-19 v81</small>
 </div>
 <script>
   setTimeout(function () {
@@ -744,7 +744,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           </div>
         </div>
         <button class="fab ctoggle" id="cToggle" type="button" aria-label="Contatti" aria-expanded="false">
-          <svg class="ico-tel" viewBox="0 0 24 24" fill="currentColor"><path d="M6.82 2.76L6.69 2.60L6.51 2.43L6.34 2.33L6.11 2.24L5.89 2.20L5.70 2.21L5.48 2.26L5.28 2.35L3.56 3.50L3.29 3.72L3.04 3.96L2.76 4.30L2.54 4.68L2.34 5.16L2.24 5.60L2.20 6.22L2.27 6.84L2.54 7.72L2.93 8.76L3.38 9.79L3.93 10.89L4.55 11.96L5.23 12.99L5.96 13.98L6.81 15.02L7.65 15.93L8.62 16.87L9.64 17.74L10.62 18.50L11.64 19.19L12.69 19.83L13.78 20.41L14.90 20.93L16.04 21.37L17.14 21.72L17.50 21.78L17.85 21.80L18.47 21.74L18.82 21.66L19.14 21.54L19.68 21.25L20.09 20.92L20.39 20.59L21.69 18.64L21.78 18.36L21.79 18.07L21.72 17.77L21.58 17.51L21.41 17.32L21.25 17.19L18.04 15.08L17.80 14.96L17.49 14.87L17.30 14.86L17.06 14.89L16.89 14.95L16.70 15.05L16.58 15.15L15.55 16.30L15.24 16.54L15.05 16.62L14.82 16.67L14.61 16.67L14.36 16.62L13.99 16.45L13.33 16.08L12.79 15.75L12.18 15.32L11.18 14.54L10.26 13.68L9.40 12.75L8.62 11.75L8.20 11.13L7.87 10.59L7.51 9.92L7.38 9.63L7.34 9.42L7.34 9.19L7.39 8.99L7.51 8.71L7.68 8.47L8.94 7.32L9.03 7.17L9.10 6.96L9.13 6.77L9.13 6.58L9.07 6.27L8.97 6.04L6.82 2.76Z"/></svg>
+          <svg class="ico-tel" viewBox="0 0 24 24" fill="currentColor"><path d="M7.55 2.97L7.38 2.75L7.13 2.53L6.90 2.38L6.59 2.26L6.33 2.21L6.00 2.21L5.74 2.26L5.51 2.35L3.72 3.52L3.27 3.90L2.94 4.26L2.72 4.58L2.50 5.01L2.33 5.47L2.22 6.05L2.20 6.44L2.21 6.74L2.30 7.33L2.55 8.13L2.97 9.24L3.51 10.43L4.11 11.58L4.79 12.70L5.54 13.77L6.34 14.80L7.21 15.77L8.13 16.70L9.10 17.57L10.12 18.38L11.19 19.13L12.20 19.76L13.35 20.38L14.43 20.89L15.64 21.37L16.75 21.72L17.14 21.78L17.53 21.80L17.83 21.79L18.21 21.74L18.59 21.65L18.88 21.55L19.23 21.39L19.48 21.24L19.95 20.88L20.35 20.45L21.65 18.50L21.78 18.11L21.79 17.69L21.72 17.35L21.54 16.96L21.32 16.69L21.06 16.47L18.00 14.47L17.69 14.30L17.27 14.19L17.00 14.17L16.75 14.20L16.43 14.29L16.21 14.40L15.95 14.60L15.00 15.66L14.86 15.78L14.66 15.88L14.53 15.89L14.41 15.87L13.44 15.34L12.48 14.71L11.57 14.00L10.73 13.21L9.95 12.37L9.25 11.46L8.62 10.49L8.14 9.61L8.12 9.49L8.13 9.37L8.19 9.19L8.26 9.08L9.38 8.06L9.59 7.81L9.71 7.59L9.78 7.35L9.82 7.09L9.82 6.83L9.74 6.42L9.59 6.09L7.55 2.97Z"/></svg>
           <svg class="ico-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
         </button>
       </section>
@@ -917,7 +917,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v80</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v81</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -2288,7 +2288,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
       [.62 + .02 * Math.sin(t * .8 + 3), .045, .55 + .3 * Math.sin(t * 1.7 + 1)],
       [.73 + .03 * Math.sin(t * .6 + 5), .055, .45 + .2 * Math.sin(t * 2.9 + 3)]
     ];
-    const hmax = mid * .92;
+    const hmax = mid * .6; // le barre non si allungano troppo in verticale
     for (const glow of [true, false]) {
       g.lineCap = 'round';
       g.lineWidth = (glow ? 5 : 2.2) * d;
@@ -2373,7 +2373,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const icoWa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.5 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6 0l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>';
   // cornetta come quella di iPhone: estremità arrotondate, tratto sottile
-  const icoTel = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.82 2.76L6.69 2.60L6.51 2.43L6.34 2.33L6.11 2.24L5.89 2.20L5.70 2.21L5.48 2.26L5.28 2.35L3.56 3.50L3.29 3.72L3.04 3.96L2.76 4.30L2.54 4.68L2.34 5.16L2.24 5.60L2.20 6.22L2.27 6.84L2.54 7.72L2.93 8.76L3.38 9.79L3.93 10.89L4.55 11.96L5.23 12.99L5.96 13.98L6.81 15.02L7.65 15.93L8.62 16.87L9.64 17.74L10.62 18.50L11.64 19.19L12.69 19.83L13.78 20.41L14.90 20.93L16.04 21.37L17.14 21.72L17.50 21.78L17.85 21.80L18.47 21.74L18.82 21.66L19.14 21.54L19.68 21.25L20.09 20.92L20.39 20.59L21.69 18.64L21.78 18.36L21.79 18.07L21.72 17.77L21.58 17.51L21.41 17.32L21.25 17.19L18.04 15.08L17.80 14.96L17.49 14.87L17.30 14.86L17.06 14.89L16.89 14.95L16.70 15.05L16.58 15.15L15.55 16.30L15.24 16.54L15.05 16.62L14.82 16.67L14.61 16.67L14.36 16.62L13.99 16.45L13.33 16.08L12.79 15.75L12.18 15.32L11.18 14.54L10.26 13.68L9.40 12.75L8.62 11.75L8.20 11.13L7.87 10.59L7.51 9.92L7.38 9.63L7.34 9.42L7.34 9.19L7.39 8.99L7.51 8.71L7.68 8.47L8.94 7.32L9.03 7.17L9.10 6.96L9.13 6.77L9.13 6.58L9.07 6.27L8.97 6.04L6.82 2.76Z"/></svg>';
+  const icoTel = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.55 2.97L7.38 2.75L7.13 2.53L6.90 2.38L6.59 2.26L6.33 2.21L6.00 2.21L5.74 2.26L5.51 2.35L3.72 3.52L3.27 3.90L2.94 4.26L2.72 4.58L2.50 5.01L2.33 5.47L2.22 6.05L2.20 6.44L2.21 6.74L2.30 7.33L2.55 8.13L2.97 9.24L3.51 10.43L4.11 11.58L4.79 12.70L5.54 13.77L6.34 14.80L7.21 15.77L8.13 16.70L9.10 17.57L10.12 18.38L11.19 19.13L12.20 19.76L13.35 20.38L14.43 20.89L15.64 21.37L16.75 21.72L17.14 21.78L17.53 21.80L17.83 21.79L18.21 21.74L18.59 21.65L18.88 21.55L19.23 21.39L19.48 21.24L19.95 20.88L20.35 20.45L21.65 18.50L21.78 18.11L21.79 17.69L21.72 17.35L21.54 16.96L21.32 16.69L21.06 16.47L18.00 14.47L17.69 14.30L17.27 14.19L17.00 14.17L16.75 14.20L16.43 14.29L16.21 14.40L15.95 14.60L15.00 15.66L14.86 15.78L14.66 15.88L14.53 15.89L14.41 15.87L13.44 15.34L12.48 14.71L11.57 14.00L10.73 13.21L9.95 12.37L9.25 11.46L8.62 10.49L8.14 9.61L8.12 9.49L8.13 9.37L8.19 9.19L8.26 9.08L9.38 8.06L9.59 7.81L9.71 7.59L9.78 7.35L9.82 7.09L9.82 6.83L9.74 6.42L9.59 6.09L7.55 2.97Z"/></svg>';
   // Home: un tocco sulla cornetta mostra i contatti; si richiudono dopo 10 s senza tocchi o dopo aver chiamato
   let cTimer = 0;
   const openContacts = open => {
