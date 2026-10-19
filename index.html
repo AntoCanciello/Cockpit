@@ -284,7 +284,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v11</small>
+  <small style="opacity:.6">2026-10-19 v12</small>
 </div>
 <script>
   setTimeout(function () {
@@ -415,7 +415,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   <div class="sheet" id="settingsSheet" hidden>
     <form class="sheet-inner" id="settingsForm">
       <header>
-        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v11</small></h1>
+        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v12</small></h1>
         <button class="btn primary" type="submit">Salva</button>
       </header>
 
@@ -623,7 +623,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       .setView(pos ? [pos.lat, pos.lng] : [41.9, 12.5], pos ? 16 : 6);
     map.attributionControl.setPrefix(false);
     map.createPane('traffic');
-    map.getPane('traffic').style.zIndex = 450;
+    map.getPane('traffic').style.zIndex = 350;
     map.getPane('traffic').style.pointerEvents = 'none';
     routeCasing = L.polyline([], { color: '#ffffff', weight: 11, opacity: .95, interactive: false }).addTo(map);
     routeLine = L.polyline([], { color: '#1a73e8', weight: 7, opacity: 1, interactive: false }).addTo(map);
@@ -790,7 +790,12 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     }
     return out;
   };
-  const fetchRoute = async (from, to) => {
+  const withCum = pts => {
+    const cum = [0];
+    for (let k = 1; k < pts.length; k++) cum.push(cum[k - 1] + dist({ lat: pts[k - 1][0], lng: pts[k - 1][1] }, { lat: pts[k][0], lng: pts[k][1] }));
+    return cum;
+  };
+  const fetchValhalla = async (from, to) => {
     const loc0 = { lat: from.lat, lon: from.lng };
     if (heading != null && kmhNow > 8) { loc0.heading = Math.round(heading); loc0.heading_tolerance = 60; }
     let lastErr;
@@ -801,27 +806,54 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
         if (!r.ok) throw new Error('HTTP ' + r.status);
         const j = await r.json();
         const leg = j.trip.legs[0];
-        const pts = decode(leg.shape);
-        const cum = [0];
-        for (let k = 1; k < pts.length; k++) cum.push(cum[k - 1] + dist({ lat: pts[k - 1][0], lng: pts[k - 1][1] }, { lat: pts[k][0], lng: pts[k][1] }));
-        const route = { pts, cum, total: cum[cum.length - 1], time: j.trip.summary.time, delay: 0, maneuvers: leg.maneuvers };
-        const tr = await trafficEta(from, to);
-        if (tr) { route.time = tr.time; route.delay = tr.delay; }
-        return route;
+        const pts = decode(leg.shape), cum = withCum(pts);
+        return { pts, cum, total: cum[cum.length - 1], time: j.trip.summary.time, delay: 0, maneuvers: leg.maneuvers, jams: [], live: false };
       } catch (e) { lastErr = e; }
     }
     throw lastErr;
   };
-
-  const trafficEta = async (from, to) => {
-    if (!cfg.tomtomKey || cfg.traffic === false) return null;
-    try {
-      const r = await fetch(`https://api.tomtom.com/routing/1/calculateRoute/${from.lat},${from.lng}:${to.lat},${to.lng}/json?key=${encodeURIComponent(cfg.tomtomKey)}&traffic=true&travelMode=motorcycle&routeType=fastest`);
-      if (!r.ok) return null;
-      const sm = (await r.json()).routes[0].summary;
-      return { time: sm.travelTimeInSeconds, delay: sm.trafficDelayInSeconds || 0 };
-    } catch { return null; }
+  // Manovre TomTom → stesse icone usate per Valhalla
+  const TT_MANEUVER = { DEPART: 1, ARRIVE: 4, ARRIVE_RIGHT: 5, ARRIVE_LEFT: 6, STRAIGHT: 8, FOLLOW: 8, SWITCH_MAIN_ROAD: 8, SWITCH_PARALLEL_ROAD: 8,
+    WAYPOINT_REACHED: 8, WAYPOINT_LEFT: 8, WAYPOINT_RIGHT: 8, BEAR_RIGHT: 9, TURN_RIGHT: 10, SHARP_RIGHT: 11, MAKE_UTURN: 13, TRY_MAKE_UTURN: 13,
+    SHARP_LEFT: 14, TURN_LEFT: 15, BEAR_LEFT: 16, ENTER_MOTORWAY: 17, ENTER_FREEWAY: 17, ENTER_HIGHWAY: 17, ENTRANCE_RAMP: 17, TAKE_EXIT: 20,
+    MOTORWAY_EXIT_RIGHT: 20, MOTORWAY_EXIT_LEFT: 21, KEEP_RIGHT: 23, KEEP_LEFT: 24, ROUNDABOUT_CROSS: 26, ROUNDABOUT_RIGHT: 26, ROUNDABOUT_LEFT: 26,
+    ROUNDABOUT_BACK: 26, TAKE_FERRY: 28 };
+  // Percorso TomTom: tiene conto del traffico (evita le code, come Google) e indica i tratti rallentati
+  const fetchTomTom = async (from, to) => {
+    let lastErr;
+    for (const mode of ['motorcycle', 'car']) {
+      const q = new URLSearchParams({ key: cfg.tomtomKey, traffic: 'true', travelMode: mode, routeType: 'fastest', instructionsType: 'text', language: 'it-IT', sectionType: 'traffic' });
+      if (heading != null && kmhNow > 8) q.set('vehicleHeading', String(Math.round(heading)));
+      try {
+        const r = await fetch(`https://api.tomtom.com/routing/1/calculateRoute/${from.lat},${from.lng}:${to.lat},${to.lng}/json?${q}`);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const rt = (await r.json()).routes[0];
+        const pts = rt.legs.flatMap(l => l.points.map(pt => [pt.latitude, pt.longitude]));
+        const cum = withCum(pts);
+        const maneuvers = (rt.guidance?.instructions || []).map(i => ({
+          type: TT_MANEUVER[i.maneuver] ?? 8,
+          instruction: i.message || '',
+          verbal_pre_transition_instruction: i.message || '',
+          street_names: i.street ? [i.street] : (i.roadNumbers || []),
+          begin_shape_index: Math.min(Math.max(0, i.pointIndex ?? 0), pts.length - 1)
+        }));
+        if (pts.length < 2 || maneuvers.length < 2) throw new Error('percorso senza indicazioni');
+        const jams = (rt.sections || []).filter(sc => sc.sectionType === 'TRAFFIC').map(sc => ({
+          from: sc.startPointIndex, to: sc.endPointIndex, mag: sc.magnitudeOfDelay ?? 1, closed: sc.simpleCategory === 'ROAD_CLOSURE'
+        }));
+        return { pts, cum, total: cum[cum.length - 1], time: rt.summary.travelTimeInSeconds, delay: rt.summary.trafficDelayInSeconds || 0, maneuvers, jams, live: true };
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr;
   };
+  const fetchRoute = async (from, to) => {
+    if (cfg.tomtomKey && cfg.traffic !== false) {
+      try { return await fetchTomTom(from, to); } catch { /* TomTom non disponibile: usiamo Valhalla */ }
+    }
+    return fetchValhalla(from, to);
+  };
+  // «traffico regolare» o «+5 min traffico» (solo con i dati TomTom)
+  const trafficNote = (r, frac = 1) => !r.live ? '' : (r.delay * frac > 60 ? ` · +${fmtDur(r.delay * frac)} traffico` : ' · traffico regolare');
 
   // ---------- Formattazione ----------
   const fmtDist = m => m < 1000 ? `${m < 100 ? Math.max(10, Math.round(m / 10) * 10) : Math.round(m / 50) * 50} m` : `${(m / 1000).toFixed(m < 10000 ? 1 : 0).replace('.', ',')} km`;
@@ -833,8 +865,11 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   let voiceIt = null;
   const pickVoice = () => { try { voiceIt = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('it')) || null; } catch { /* nessuna voce */ } };
   if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.addEventListener?.('voiceschanged', pickVoice); }
+  let lastSaid = '', lastSaidAt = 0;
   const say = text => {
     if (cfg.voice === false || !text || !('speechSynthesis' in window)) return;
+    if (text === lastSaid && Date.now() - lastSaidAt < 30000) return;
+    lastSaid = text; lastSaidAt = Date.now();
     try {
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'it-IT'; if (voiceIt) u.voice = voiceIt; u.rate = 1.02;
@@ -868,10 +903,18 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   // ---------- Destinazione e navigazione ----------
   let preview = null;     // { place, route }
   const nav = { active: false, route: null, place: null, step: 1, seg: 0, off: 0, spoken: {}, lastReroute: 0 };
+  let jamLayer = null;
+  const JAM_COLORS = ['#f29900', '#f29900', '#e8710a', '#d93025', '#a50e0e']; // per gravità del ritardo
   const drawRoute = route => {
     if (!map) return;
     const ll = route ? route.pts : [];
     routeCasing.setLatLngs(ll); routeLine.setLatLngs(ll);
+    if (jamLayer) { jamLayer.remove(); jamLayer = null; }
+    if (route && route.jams && route.jams.length) {
+      jamLayer = L.layerGroup(route.jams.map(j => L.polyline(route.pts.slice(j.from, j.to + 1), {
+        color: j.closed ? '#5f0f0f' : JAM_COLORS[Math.min(Math.max(j.mag, 0), 4)], weight: 7, opacity: 1, interactive: false, lineCap: 'butt'
+      }))).addTo(map);
+    }
   };
   const setDestMarker = place => {
     if (!map) return;
@@ -897,8 +940,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       preview.route = route;
       drawRoute(route);
       if (map) map.fitBounds(routeLine.getBounds(), { padding: [70, 40] });
-      const delay = route.delay > 60 ? ` (+${fmtDur(route.delay)} traffico)` : '';
-      showPill(place.name, `${fmtDist(route.total)} · ${fmtDur(route.time)}${delay} · arrivo ${fmtClock(new Date(Date.now() + route.time * 1000))}`, true);
+      showPill(place.name, `${fmtDist(route.total)} · ${fmtDur(route.time)} · arrivo ${fmtClock(new Date(Date.now() + route.time * 1000))}${trafficNote(route)}`, true);
     } catch {
       if (preview && preview.place === place) showPill(place.name, 'Percorso non disponibile: controlla la connessione e riprova', false);
     }
@@ -953,6 +995,15 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       navUpdate();
     } catch { /* riproveremo alla prossima posizione */ }
   };
+  setInterval(async () => {
+    if (!nav.active || !nav.route || !nav.route.live || !pos || pos.stale) return;
+    try {
+      const route = await fetchRoute(pos, nav.place);
+      if (!nav.active) return;
+      Object.assign(nav, { route, step: Math.min(1, route.maneuvers.length - 1), seg: 0, spoken: {} });
+      drawRoute(route); navUpdate();
+    } catch { /* riproveremo tra 5 minuti */ }
+  }, 300000);
   const arrive = () => { say(`Sei arrivato a destinazione${nav.place ? ', ' + nav.place.name : ''}`); stopNav(); };
   const navUpdate = () => {
     if (!nav.active || !pos || pos.stale) return;
@@ -972,8 +1023,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     // Barra arrivo
     const secs = r.time * (remain / (r.total || 1));
     $('#navEta').textContent = fmtClock(new Date(Date.now() + secs * 1000));
-    const late = (r.delay || 0) * (remain / (r.total || 1));
-    $('#navLeft').textContent = `${fmtDur(secs)} · ${fmtDist(remain)}${late > 60 ? ` · +${fmtDur(late)} traffico` : ''}`;
+    $('#navLeft').textContent = `${fmtDur(secs)} · ${fmtDist(remain)}${trafficNote(r, remain / (r.total || 1))}`;
     // Voce: preavviso e momento della manovra, anticipati in base alla velocità
     const v = Math.min(Math.max(kmhNow, 20), 130) / 3.6;
     const farAt = Math.max(250, v * 14), nearAt = Math.max(45, v * 5);
