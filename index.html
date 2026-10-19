@@ -542,8 +542,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   const layout = () => {
     const w = innerWidth || document.documentElement.clientWidth, h = innerHeight || document.documentElement.clientHeight;
     if (!w || !h) { setTimeout(layout, 120); return; } // all'avvio dalla Home iOS può dare 0
-    const sheetOpen = $$('.sheet').some(s => !s.hidden);
-    const rotate = h > w && cfg.rotate !== 'off' && !sheetOpen;
+    const rotate = h > w && cfg.rotate !== 'off'; // sempre orizzontale, anche impostazioni e ricerca
     stage.classList.toggle('rot-r', rotate && cfg.rotate === 'r');
     stage.classList.toggle('rot-l', rotate && cfg.rotate === 'l');
     stage.classList.toggle('norot', !rotate);
