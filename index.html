@@ -2,6 +2,9 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
+<!-- prima di tutto il resto: la pagina è scura fin dal primo istante (altrimenti iOS mostra un lampo bianco all'avvio) -->
+<meta name="color-scheme" content="dark">
+<style>html,body{background:#07090d}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -9,7 +12,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v91">
+<meta name="cockpit-version" content="2026-10-19 v92">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <!-- schermata che iOS mostra mentre apre l'app dalla Home: lo stesso sfondo dell'introduzione, così non c'è nessun lampo -->
@@ -693,7 +696,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(70% 70% at 50% 50%,#142036,#07090d 70%);color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg" style="visibility:hidden">Avvio Cockpit…</div>
-  <small id="bootVer" style="opacity:.6;visibility:hidden">2026-10-19 v91</small>
+  <small id="bootVer" style="opacity:.6;visibility:hidden">2026-10-19 v92</small>
 </div>
 <script>
   // la scritta «Avvio Cockpit…» compare solo se l'avvio va per le lunghe (prima era un lampo prima dell'introduzione)
@@ -1021,7 +1024,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v91</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v92</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
@@ -2999,6 +3002,9 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
   // a ogni tocco (iOS a volte vuole un gesto) e ogni 20 secondi controlliamo che entrambi siano attivi
   document.addEventListener('pointerdown', () => { if (!lock || !wakeVideo || wakeVideo.paused) keepAwake(); }, { passive: true });
   setInterval(keepAwake, 20000);
+
+  // ---------- Avvio immediato dalla memoria del telefono (sw.js) ----------
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
 
   // ---------- Istantanea per iOS ----------
   // iOS fotografa l'app quando va in secondo piano e alla riapertura mostra quella foto per un attimo:
