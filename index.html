@@ -581,9 +581,6 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   if (window.L) {
     map = L.map('map', { zoomControl: false, doubleClickZoom: 'center', touchZoom: 'center', scrollWheelZoom: 'center', inertia: false })
       .setView(pos ? [pos.lat, pos.lng] : [41.9, 12.5], pos ? 16 : 6);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd', maxZoom: 20, attribution: '© OpenStreetMap © CARTO'
-    }).addTo(map);
     map.attributionControl.setPrefix(false);
     map.createPane('traffic');
     map.getPane('traffic').style.zIndex = 450;
@@ -623,9 +620,33 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     $('#map').innerHTML = '<div class="map-msg">Mappa non disponibile: controlla la connessione e riapri l\'app.</div>';
   }
 
+  // ---------- Mappa di base: TomTom se c'è la chiave, altrimenti OpenStreetMap ----------
+  let baseLayer = null;
+  function applyBase() {
+    if (!map) return;
+    if (baseLayer) { baseLayer.remove(); baseLayer = null; }
+    if (cfg.tomtomKey) {
+      baseLayer = L.tileLayer(`https://api.tomtom.com/map/1/tile/basic/main/{z}/{x}/{y}.png?key=${encodeURIComponent(cfg.tomtomKey)}&tileSize=512&language=it-IT`, {
+        tileSize: 512, zoomOffset: -1, maxZoom: 20, maxNativeZoom: 22, attribution: '© TomTom © OpenStreetMap'
+      });
+      // Se la chiave non funziona per le mappe, torniamo a OpenStreetMap
+      let fails = 0;
+      baseLayer.on('tileerror', () => { if (++fails === 4) { cfg.tomtomKeyMapFail = true; useOsm(); } });
+      if (!cfg.tomtomKeyMapFail) { baseLayer.addTo(map); return; }
+    }
+    useOsm();
+  }
+  function useOsm() {
+    if (baseLayer) baseLayer.remove();
+    baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 20, maxNativeZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(map);
+  }
+
   // ---------- Traffico (TomTom): solo code e rallentamenti, come Google ----------
   let trafficLayer = null;
   function applyTraffic() {
+    applyBase();
     if (!map) return;
     if (trafficLayer) { trafficLayer.remove(); trafficLayer = null; }
     if (cfg.traffic === false || !cfg.tomtomKey) return;
@@ -1201,6 +1222,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     draft.voice = $('#sVoice').checked;
     draft.traffic = $('#sTraffic').checked;
     draft.tomtomKey = $('#sTomtom').value.trim();
+    delete draft.tomtomKeyMapFail;
     readStationsForm();
     draft.stations = draft.stations.filter(st => st.url).map(st => ({ ...st, name: st.name || 'Radio' }));
     if (!draft.stations.length) draft.stations = [{ name: 'Radio Deejay', url: STREAMS[0], logo: '' }];
