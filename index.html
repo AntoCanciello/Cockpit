@@ -224,6 +224,8 @@ input[type=text], input[type=tel], input[type=url], input[type=search], select {
 input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--muted); }
 .contact-edit { display: flex; flex-direction: column; gap: 10px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
 .contact-edit:last-child { border-bottom: 0; padding-bottom: 0; }
+.pick-help { padding: 14px; border-radius: 14px; background: var(--panel-2); border: 1px solid var(--accent); font-size: 14px; line-height: 1.5; -webkit-user-select: text; user-select: text; }
+.pick-help ol { margin: 6px 0 10px; padding-left: 20px; }
 .contact-edit h3 { margin: 0; font-size: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .pick { height: 40px; padding: 0 14px; border-radius: 12px; background: var(--panel-2); color: var(--accent); font-weight: 600; font-size: 14px; }
 .logo-prev { width: 64px; height: 64px; border-radius: 14px; background: var(--panel-2) center/contain no-repeat; border: 1px dashed var(--line); flex: 0 0 auto; }
@@ -426,7 +428,16 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 
       <fieldset>
         <legend>Contatti preferiti</legend>
-        <p class="note"><b>Prendere un contatto dalla rubrica:</b> tocca il campo «Nome» e, sopra la tastiera, tocca <b>«Compila automaticamente contatto»</b> (o l'icona della rubrica): scegli la persona e nome e numero si compilano da soli.</p>
+        <div class="pick-help" id="pickHelp" hidden>
+          <b>Per aprire la rubrica da qui serve un'impostazione di iPhone (una volta sola):</b>
+          <ol>
+            <li>Apri l'app <b>Impostazioni</b> dell'iPhone.</li>
+            <li>Vai su <b>App → Safari → Avanzate → Feature Flags</b>.</li>
+            <li>Attiva <b>Contact Picker API</b>.</li>
+            <li>Chiudi il Cockpit dal multitasking e riaprilo: «Scegli dalla rubrica» aprirà la rubrica.</li>
+          </ol>
+          <b>Senza cambiare impostazioni:</b> scrivi le prime lettere del nome nel campo «Nome» e tocca il contatto che compare sopra la tastiera; poi tocca «Numero» e scegli il numero suggerito sopra la tastiera.
+        </div>
         <div id="sContacts" style="display:flex;flex-direction:column;gap:14px"></div>
         <p class="note">Per ogni contatto scegli se mostrare WhatsApp e chiamata, o solo la chiamata normale. Il tasto verde apre la chat WhatsApp; per chiamare su WhatsApp con un solo tocco crea nell'app Comandi un comando «Chiama» → contatto → WhatsApp e scrivi qui il suo nome esatto.</p>
       </fieldset>
@@ -457,7 +468,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
         <legend>Stazioni radio</legend>
         <div id="sStations" style="display:flex;flex-direction:column;gap:14px"></div>
         <button type="button" class="btn" id="addStation">+ Aggiungi stazione</button>
-        <p class="note">Per ogni stazione servono il nome e l'indirizzo dello stream (.m3u8, .mp3 o .aac): lo trovi su <b>radio-browser.info</b> cercando il nome della radio. Il logo lo carichi dalle Foto, come quelli dello scooter. Con ◀ ▶ passi da una stazione all'altra.</p>
+        <p class="note">Per ogni stazione servono il nome e l'indirizzo dello stream (.m3u8, .mp3 o .aac): lo trovi su <b>radio-browser.info</b> cercando il nome della radio. Il logo arriva da solo dal sito della radio; se non ti piace, caricane uno dalle Foto. Con ◀ ▶ passi da una stazione all'altra.</p>
       </fieldset>
 
       <fieldset>
@@ -489,7 +500,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   const DEFAULTS = {
     vehicle: 'C 400 GT', brandLogo: '', modelLogo: '',
     rotate: 'r', follow: true, autoplay: false, voice: true,
-    stations: [{ name: 'Radio Deejay', url: STREAMS[0], logo: '' }], stationIdx: 0,
+    stations: [{ name: 'Radio Deejay', url: STREAMS[0], logo: '', site: 'deejay.it' }], stationIdx: 0,
     traffic: true, tomtomKey: '',
     home: '', work: '',
     contacts: [
@@ -503,7 +514,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     try {
       const s = JSON.parse(localStorage.getItem(KEY) || '{}');
       const c = { ...structuredClone(DEFAULTS), ...s, contacts: (s.contacts || structuredClone(DEFAULTS.contacts)).slice(0, 3) };
-      if (!s.stations && s.stream) c.stations = [{ name: 'Radio Deejay', url: s.stream, logo: '' }]; // vecchie impostazioni
+      if (!s.stations && s.stream) c.stations = [{ name: 'Radio Deejay', url: s.stream, logo: '', site: 'deejay.it' }]; // vecchie impostazioni
       return c;
     }
     catch { return structuredClone(DEFAULTS); }
@@ -947,7 +958,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   const audio = $('#audio');
   const status = $('#radioStatus');
   let streamIdx = 0, wantPlay = false;
-  const stations = () => (cfg.stations && cfg.stations.length ? cfg.stations : [{ name: 'Radio Deejay', url: STREAMS[0], logo: '' }]);
+  const stations = () => (cfg.stations && cfg.stations.length ? cfg.stations : [{ name: 'Radio Deejay', url: STREAMS[0], logo: '', site: 'deejay.it' }]);
   const curStation = () => {
     const list = stations();
     cfg.stationIdx = Math.min(Math.max(0, cfg.stationIdx || 0), list.length - 1);
@@ -961,14 +972,26 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     $('#icoPlay').hidden = on; $('#icoPause').hidden = !on;
     $('#play').setAttribute('aria-label', on ? 'Pausa' : 'Play');
   };
+  // Logo automatico preso dal sito della radio (se non ne hai caricato uno)
+  const autoLogo = st => {
+    const site = (st.site || (/radiodeejay/i.test(st.url) ? 'deejay.it' : '')).trim().replace(/^https?:\/\//, '').split('/')[0];
+    return site ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site)}&sz=256` : '';
+  };
   function renderStation() {
     const st = curStation();
-    $('#stLogo').innerHTML = st.logo ? `<img src="${st.logo}" alt="${esc(st.name)}">` : `<span>${esc(st.name)}</span>`;
+    const src = st.logo || autoLogo(st);
+    const textLogo = () => { $('#stLogo').innerHTML = `<span>${esc(st.name)}</span>`; };
+    if (src) {
+      $('#stLogo').innerHTML = `<img src="${src}" alt="${esc(st.name)}">`;
+      const img = $('#stLogo img');
+      img.onerror = textLogo;
+      img.onload = () => { if (!st.logo && img.naturalWidth < 48) textLogo(); }; // icona generica: meglio il nome
+    } else textLogo();
     $('#stName').textContent = st.name;
     const many = stations().length > 1;
     $('#prevSt').disabled = !many; $('#nextSt').disabled = !many;
     if ('mediaSession' in navigator) {
-      try { navigator.mediaSession.metadata = new MediaMetadata({ title: st.name, artist: 'In diretta', artwork: st.logo ? [{ src: st.logo, sizes: '240x240', type: 'image/png' }] : [] }); } catch { /* metadati non supportati */ }
+      try { navigator.mediaSession.metadata = new MediaMetadata({ title: st.name, artist: 'In diretta', artwork: src ? [{ src, sizes: '256x256' }] : [] }); } catch { /* metadati non supportati */ }
     }
   }
   const playRadio = () => {
@@ -1116,7 +1139,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     const canPick = 'contacts' in navigator && typeof navigator.contacts.select === 'function';
     $('#sContacts').innerHTML = draft.contacts.map((c, i) => `
       <div class="contact-edit">
-        <h3>Contatto ${i + 1}${canPick ? `<button type="button" class="pick" data-pick="${i}">Scegli dalla rubrica</button>` : ''}</h3>
+        <h3>Contatto ${i + 1}<button type="button" class="pick" data-pick="${i}">Scegli dalla rubrica</button></h3>
         <div class="row">
           <label for="cN${i}">Nome<input type="text" id="cN${i}" name="c${i}-name" autocomplete="section-c${i} name" value="${esc(c.name)}" placeholder="Es. Marco"></label>
           <label for="cP${i}">Numero<input type="tel" id="cP${i}" name="c${i}-tel" autocomplete="section-c${i} tel" value="${esc(c.phone)}" placeholder="Es. 333 1234567"></label>
@@ -1133,6 +1156,12 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
       </div>`).join('');
     $$('[data-pick]').forEach(b => b.addEventListener('click', async () => {
       const i = b.dataset.pick;
+      if (!canPick) {
+        const help = $('#pickHelp');
+        help.hidden = false;
+        help.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
       try {
         const [ct] = await navigator.contacts.select(['name', 'tel'], { multiple: false });
         if (!ct) return;
@@ -1185,7 +1214,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 
   // Stazioni radio nelle impostazioni
   function readStationsForm() {
-    draft.stations = draft.stations.map((st, i) => ({ ...st, name: ($('#stN' + i)?.value ?? st.name).trim(), url: ($('#stU' + i)?.value ?? st.url).trim() }));
+    draft.stations = draft.stations.map((st, i) => ({ ...st, name: ($('#stN' + i)?.value ?? st.name).trim(), url: ($('#stU' + i)?.value ?? st.url).trim(), site: ($('#stS' + i)?.value ?? st.site ?? '').trim() }));
   }
   function fillStations() {
     const box = $('#sStations');
@@ -1196,6 +1225,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
           <label for="stN${i}">Nome<input type="text" id="stN${i}" value="${esc(st.name)}" placeholder="Es. Radio Deejay"></label>
           <label for="stU${i}">Indirizzo stream<input type="url" id="stU${i}" value="${esc(st.url)}" placeholder="https://…" autocapitalize="off" spellcheck="false"></label>
         </div>
+        <label for="stS${i}">Sito della radio (per il logo automatico)<input type="text" id="stS${i}" value="${esc(st.site || '')}" placeholder="Es. deejay.it" autocapitalize="off" spellcheck="false"></label>
         <div class="logo-slot">
           <div class="logo-prev" style="background-color:#fff;background-image:${st.logo ? `url('${st.logo}')` : 'none'}"></div>
           <label for="stL${i}" style="flex:1">Logo della stazione<input type="file" id="stL${i}" accept="image/*" data-st-logo="${i}"></label>
@@ -1225,7 +1255,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     delete draft.tomtomKeyMapFail;
     readStationsForm();
     draft.stations = draft.stations.filter(st => st.url).map(st => ({ ...st, name: st.name || 'Radio' }));
-    if (!draft.stations.length) draft.stations = [{ name: 'Radio Deejay', url: STREAMS[0], logo: '' }];
+    if (!draft.stations.length) draft.stations = [{ name: 'Radio Deejay', url: STREAMS[0], logo: '', site: 'deejay.it' }];
     draft.contacts = draft.contacts.map((_, i) => ({
       name: $('#cN' + i).value.trim(), phone: $('#cP' + i).value.trim(), shortcut: $('#cS' + i).value.trim(), mode: $('#cM' + i).value
     }));
