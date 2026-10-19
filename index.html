@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Cockpit">
 <meta name="theme-color" content="#07090d">
-<meta name="cockpit-version" content="2026-10-19 v69">
+<meta name="cockpit-version" content="2026-10-19 v70">
 <link rel="apple-touch-icon" href="icon-180.png?v=2">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2">
 <title>Cockpit C 400 GT</title>
@@ -271,7 +271,7 @@ main {
 #pRadio.playing .wave-hint { opacity: 0; }
 #stage.land #app[data-mode="home"] .wave { margin-block: auto; max-height: 96px; }
 #app[data-mode="radio"] .wave { max-height: 200px; min-height: 120px; max-width: 460px; margin-inline: auto; }
-#stage:not(.land) #app[data-mode="home"] .wave { min-height: 48px; max-height: 64px; }
+#stage:not(.land) #app[data-mode="home"] .wave { min-height: 48px; max-height: 64px; flex: 0 1 auto; width: 56%; margin-inline: auto; } /* in verticale: più stretta, centrata nello spazio accanto al logo */
 #stage:not(.land) #app[data-mode="home"] .wave-hint { bottom: 0; font-size: 11px; }
 .rbtn { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--panel-2); color: var(--fg); flex: 0 0 auto; }
 .rbtn svg { width: 24px; height: 24px; }
@@ -609,7 +609,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v69</small>
+  <small style="opacity:.6">2026-10-19 v70</small>
 </div>
 <script>
   setTimeout(function () {
@@ -914,7 +914,7 @@ input.switch:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; 
           <section class="set-sec" data-sec="info">
             <h2>Info</h2>
             <div class="group">
-              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v69</span></div>
+              <div class="item inline"><span>Versione</span><span class="muted" id="verLabel">2026-10-19 v70</span></div>
               <div class="item"><span>Schermo</span><small class="muted" id="screenInfo"></small></div>
               <div class="item">
                 <span>Scatola nera (GPS e mappa durante il viaggio)</span>
