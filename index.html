@@ -284,7 +284,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
 <body>
 <div id="boot" style="position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#07090d;color:#8b95a5;font:16px -apple-system,system-ui,sans-serif;text-align:center;padding:24px">
   <div id="bootMsg">Avvio Cockpit…</div>
-  <small style="opacity:.6">2026-10-19 v10</small>
+  <small style="opacity:.6">2026-10-19 v11</small>
 </div>
 <script>
   setTimeout(function () {
@@ -415,7 +415,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   <div class="sheet" id="settingsSheet" hidden>
     <form class="sheet-inner" id="settingsForm">
       <header>
-        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v10</small></h1>
+        <h1>Impostazioni <small style="font-size:12px;color:var(--muted);font-weight:500">2026-10-19 v11</small></h1>
         <button class="btn primary" type="submit">Salva</button>
       </header>
 
@@ -686,41 +686,70 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   // ---------- Traffico (TomTom): solo code e rallentamenti, come Google ----------
   let trafficLayer = null;
   const trafficStats = { ok: 0, err: 0, lastErr: '' };
+  // TomTom ha tre versioni del servizio traffico: gli account nuovi a volte accettano solo le «Orbis»
+  const TRAFFIC_EPS = [
+    { id: 'v4', name: 'Traffic v4', url: (k, z, x, y) => `https://api.tomtom.com/traffic/map/4/tile/flow/relative0/${z}/${x}/${y}.png?key=${k}&tileSize=256` },
+    { id: 'orbis1', name: 'Orbis v1', url: (k, z, x, y) => `https://api.tomtom.com/maps/orbis/traffic/tile/flow/${z}/${x}/${y}.png?apiVersion=1&key=${k}&style=light&tileSize=256` },
+    { id: 'orbis2', name: 'Orbis v2', url: (k, z, x, y) => `https://api.tomtom.com/maps/orbis/traffic/flow/raster/tile/${z}/${x}/${y}?apiVersion=2&key=${k}&style=light&tileSize=256` }
+  ];
+  const testTile = () => {
+    const c = pos && !pos.stale ? pos : { lat: 40.85, lng: 14.27 };
+    const z = 12, n = 2 ** z;
+    return { z, x: Math.floor((c.lng + 180) / 360 * n), y: Math.floor((1 - Math.log(Math.tan(c.lat * Math.PI / 180) + 1 / Math.cos(c.lat * Math.PI / 180)) / Math.PI) / 2 * n) };
+  };
+  // Prova le versioni una per una; restituisce quella che funziona e l'esito di tutte
+  async function detectTrafficEp(key) {
+    const t = testTile(), results = [];
+    for (const ep of TRAFFIC_EPS) {
+      try {
+        const r = await fetch(ep.url(encodeURIComponent(key), t.z, t.x, t.y));
+        results.push(`${ep.name}: ${r.ok ? 'OK' : 'errore ' + r.status}`);
+        if (r.ok) return { id: ep.id, results };
+      } catch { results.push(`${ep.name}: non raggiungibile`); }
+    }
+    return { id: null, results };
+  }
+  let detecting = false;
+  async function redetectTraffic() {
+    if (detecting || !cfg.tomtomKey) return;
+    detecting = true;
+    const d = await detectTrafficEp(cfg.tomtomKey);
+    detecting = false;
+    if (d.id && d.id !== cfg.trafficEp) { cfg.trafficEp = d.id; save(); applyTraffic(); }
+    else if (!d.id) $('#trafficToast').hidden = false;
+  }
   function applyTraffic() {
     applyBase();
     if (!map) return;
     if (trafficLayer) { trafficLayer.remove(); trafficLayer = null; }
     trafficStats.ok = 0; trafficStats.err = 0; trafficStats.lastErr = '';
+    $('#trafficToast').hidden = true;
     if (cfg.traffic === false || !cfg.tomtomKey) return;
+    const ep = TRAFFIC_EPS.find(e => e.id === cfg.trafficEp) || TRAFFIC_EPS[0];
     // Colori come Google: verde scorrevole, arancione rallentato, rosso coda
-    trafficLayer = L.tileLayer(`https://api.tomtom.com/traffic/map/4/tile/flow/relative0/{z}/{x}/{y}.png?key=${encodeURIComponent(cfg.tomtomKey)}&tileSize=256&thickness=6`, {
+    trafficLayer = L.tileLayer(ep.url(encodeURIComponent(cfg.tomtomKey), '{z}', '{x}', '{y}'), {
       pane: 'traffic', tileSize: 256, maxZoom: 20, maxNativeZoom: 20, opacity: .9, attribution: 'Traffico © TomTom', updateWhenIdle: true
     });
-    trafficLayer.on('tileload', () => { trafficStats.ok++; });
-    trafficLayer.on('tileerror', () => { trafficStats.err++; if (trafficStats.err >= 4 && !trafficStats.ok) $('#trafficToast').hidden = false; });
-    trafficLayer.on('tileload', () => { $('#trafficToast').hidden = true; });
-    $('#trafficToast').hidden = true;
+    trafficLayer.on('tileload', () => { trafficStats.ok++; $('#trafficToast').hidden = true; });
+    trafficLayer.on('tileerror', () => { trafficStats.err++; if (trafficStats.err === 4 && !trafficStats.ok) redetectTraffic(); });
     trafficLayer.addTo(map);
+    if (!cfg.trafficEp) redetectTraffic(); // prima volta: scopriamo quale versione accetta la chiave
   }
-  // Prova diretta della chiave: dice se il traffico risponde e perché no
+  // Tasto «Verifica traffico»
   async function testTraffic() {
     const el = $('#trafficStatus');
     if (!el) return;
     const key = tomtomKeyFrom($('#sTomtom').value);
     if (!key) { el.textContent = ''; return; }
-    el.style.color = 'var(--muted)'; el.textContent = 'Verifico il traffico…';
-    const c = pos && !pos.stale ? pos : { lat: 40.85, lng: 14.27 };
-    const z = 12, n = 2 ** z;
-    const x = Math.floor((c.lng + 180) / 360 * n);
-    const y = Math.floor((1 - Math.log(Math.tan(c.lat * Math.PI / 180) + 1 / Math.cos(c.lat * Math.PI / 180)) / Math.PI) / 2 * n);
-    try {
-      const r = await fetch(`https://api.tomtom.com/traffic/map/4/tile/flow/relative0/${z}/${x}/${y}.png?key=${encodeURIComponent(key)}&tileSize=256`);
-      if (r.ok) { el.style.color = 'var(--ok)'; el.textContent = `✓ Il traffico risponde (${trafficStats.ok} riquadri caricati sulla mappa${trafficStats.err ? `, ${trafficStats.err} errori` : ''}).`; }
-      else if (r.status === 403 || r.status === 401) { el.style.color = '#ff8a80'; el.textContent = `✗ TomTom rifiuta la chiave per il traffico (errore ${r.status}). Su developer.tomtom.com apri la chiave e controlla in «Products» che «Traffic» sia attivo.`; }
-      else { el.style.color = '#ff8a80'; el.textContent = `✗ Il traffico non risponde (errore ${r.status}). Riprova tra poco.`; }
-    } catch {
-      el.style.color = trafficStats.ok ? 'var(--ok)' : '#ff8a80';
-      el.textContent = trafficStats.ok ? `✓ ${trafficStats.ok} riquadri del traffico caricati sulla mappa.` : '✗ Non riesco a contattare TomTom: controlla la connessione.';
+    el.style.color = 'var(--muted)'; el.textContent = 'Verifico le versioni del traffico TomTom…';
+    const d = await detectTrafficEp(key);
+    if (d.id) {
+      const ep = TRAFFIC_EPS.find(e => e.id === d.id);
+      el.style.color = 'var(--ok)'; el.textContent = `✓ Il traffico funziona con ${ep.name}. (${d.results.join(' · ')})`;
+      if (key === cfg.tomtomKey && cfg.trafficEp !== d.id) { cfg.trafficEp = d.id; save(); applyTraffic(); }
+      if (draft) draft.trafficEp = d.id;
+    } else {
+      el.style.color = '#ff8a80'; el.textContent = `✗ Nessuna versione del traffico accetta la chiave. ${d.results.join(' · ')}. Mandami questo messaggio.`;
     }
   }
   setInterval(() => { if (trafficLayer && document.visibilityState === 'visible') trafficLayer.redraw(); }, 180000);
@@ -1329,6 +1358,7 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
     draft.traffic = $('#sTraffic').checked;
     draft.tomtomKey = tomtomKeyFrom($('#sTomtom').value);
     delete draft.tomtomKeyMapFail;
+    if (draft.tomtomKey !== cfg.tomtomKey) delete draft.trafficEp;
     readStationsForm();
     draft.stations = draft.stations.filter(st => st.url).map(st => ({ ...st, name: st.name || 'Radio' }));
     if (!draft.stations.length) draft.stations = [{ name: 'Radio Deejay', url: STREAMS[0], logo: '', site: 'deejay.it' }];
