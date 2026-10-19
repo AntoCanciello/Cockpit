@@ -195,7 +195,7 @@ main {
 #app[data-mode="contacts"] .cbtn svg { width: 34px; height: 34px; }
 
 /* ---------- Splash ---------- */
-#splash { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: radial-gradient(80% 80% at 50% 40%, #142036, var(--bg) 70%); transition: opacity .5s; }
+#splash { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: radial-gradient(80% 80% at 50% 40%, #142036, var(--bg) 70%); transition: opacity .7s ease; }
 #splash.out { opacity: 0; pointer-events: none; }
 .logos { display: flex; align-items: center; gap: 28px; }
 .logos img { max-height: 110px; max-width: 220px; object-fit: contain; }
@@ -368,8 +368,6 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   <div id="splash">
     <div class="logos" id="splashLogos"></div>
     <div class="model-name" id="splashName">C 400 GT</div>
-    <button class="start" id="start">Avvia</button>
-    <div class="hint">Lo schermo resterà acceso finché l'app è aperta</div>
   </div>
 
   <!-- RICERCA -->
@@ -1064,13 +1062,24 @@ input[type=file] { max-width: 100%; width: 100%; font-size: 14px; color: var(--m
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
 
   // ---------- Avvio ----------
-  $('#start').addEventListener('click', () => {
+  // La schermata con i loghi sparisce da sola dopo 3 secondi (o subito con un tocco)
+  const hideSplash = () => {
+    const sp = $('#splash');
+    if (sp.classList.contains('out')) return;
+    sp.classList.add('out');
+    setTimeout(() => { sp.hidden = true; }, 700);
+  };
+  setTimeout(hideSplash, 2300);
+  $('#splash').addEventListener('click', hideSplash);
+  startGeo();
+  keepAwake();
+  // iOS concede schermo acceso, audio e voce solo dopo un tocco: li attiviamo al primo
+  const firstTouch = () => {
     keepAwake();
-    startGeo();
-    if (cfg.autoplay) playRadio();
-    $('#splash').classList.add('out');
-    setTimeout(() => { $('#splash').hidden = true; }, 500);
-  });
+    if (cfg.autoplay && !wantPlay) playRadio();
+    if ('speechSynthesis' in window) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch { /* niente voce */ } }
+  };
+  document.addEventListener('pointerdown', firstTouch, { once: true, capture: true });
 
   renderBrand(); renderContacts(); layout();
 })();
