@@ -1,0 +1,14 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--headless=new'], ignoreDefaultArgs: ['--headless=old'] });
+const ctx = await b.newContext({ viewport: { width: 912, height: 420 } });
+await ctx.addInitScript(() => localStorage.setItem('cockpit.v1', JSON.stringify({ actUrl: 'https://www.virtualsmarthome.xyz/url_routine_trigger/activate.php?trigger=TEST&token=X&response=json', actName: 'Cockpit Casa', radioItV1: true, radioItV2: true, radioOrderV3: true, radioKKNV4: true, radioTgcomV5: true })));
+let hit = null;
+await ctx.route('**/*', r => { const u = r.request().url(); if (u.startsWith('file://') || u.startsWith('data:')) return r.continue(); if (u.includes('virtualsmarthome')) { hit = u; return r.abort(); } return r.abort(); });
+const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+await p.goto(new URL('../index.html', import.meta.url).href); await p.waitForTimeout(3000); await p.mouse.click(456, 60);
+await p.evaluate(() => document.getElementById('pRadio').classList.add('act')); await p.waitForTimeout(400);
+const url0 = p.url();
+await p.click('#actBtn'); await p.waitForTimeout(800);
+console.log('chiamato:', !!hit, '| classi:', await p.getAttribute('#actBtn', 'class'), '| pagina invariata:', p.url() === url0, '| href:', await p.getAttribute('#actBtn', 'href'));
+await p.screenshot({ path: 'act_ko.png', clip: await p.locator('#pRadio').boundingBox() }); await p.waitForTimeout(1200); console.log('dopo 1 s:', await p.getAttribute('#actBtn', 'class')); await p.screenshot({ path: 'act_url.png', clip: await p.locator('#pRadio').boundingBox() });
+console.log(errs.join(' ') || 'no errors'); await b.close();

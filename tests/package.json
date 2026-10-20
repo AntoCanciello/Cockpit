@@ -1,0 +1,10 @@
+{
+  "name": "cockpit-tests",
+  "private": true,
+  "type": "module",
+  "description": "Prove automatiche del Cockpit (Playwright con Chromium headless). Vedi README.md",
+  "dependencies": {
+    "maplibre-gl": "4.7.1",
+    "playwright": "1.47.2"
+  }
+}

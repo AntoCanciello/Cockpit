@@ -1,0 +1,15 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--headless=new'], ignoreDefaultArgs: ['--headless=old'] });
+const ctx = await b.newContext({ viewport: { width: 912, height: 420 } });
+await ctx.addInitScript(() => { Object.defineProperty(screen, 'orientation', { value: { angle: 90, type: 'landscape-primary', addEventListener() {} }, configurable: true }); window.orientation = 90; });
+await ctx.route('**/*', r => r.request().url().startsWith('file://') || r.request().url().startsWith('data:') ? r.continue() : r.abort());
+const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+await p.goto(new URL('../index.html', import.meta.url).href); await p.waitForTimeout(3500); await p.mouse.click(456, 60);
+const st = () => p.evaluate(() => `lefty ${document.getElementById('stage').classList.contains('lefty')} | rail x ${Math.round(document.querySelector('.rail').getBoundingClientRect().left)}`);
+console.log('prima:', await st());
+await p.evaluate(() => { document.querySelector('#openSettings').click(); document.querySelector('button[data-sec="design"]').click(); }); await p.waitForTimeout(500);
+await p.evaluate(() => { document.getElementById('sLefty').checked = true; document.querySelector('.tbtn.save').click(); }); await p.waitForTimeout(800);
+console.log('dopo salva:', await st(), '| salvato', await p.evaluate(() => JSON.parse(localStorage.getItem('cockpit.v1')).lefty));
+await p.reload(); await p.waitForTimeout(3000);
+console.log('dopo riavvio:', await st());
+console.log(errs.join(' ') || 'no errors'); await b.close();
