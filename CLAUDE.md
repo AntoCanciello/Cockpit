@@ -31,7 +31,7 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   `lefty` modalità mancino, `editing` matita, `rotating`, `glass-*`, `walled`) → `#app[data-mode=home|map|radio|contacts]`
   → `.rail` (barra pulsanti) + `main` (griglia: `#pMap`, `#pContacts` meteo/calendario/contatti, `#pRadio`).
 - Impostazioni in `localStorage['cockpit.v1']` (`cfg`, salvate con `save()`); altre chiavi `cockpit.*`
-  (lastpos, recent, logos, diag = scatola nera, cpage, wx, streams, islsafe, islside, setsec).
+  (lastpos, recent, logos, diag = scatola nera, wx, streams, islsafe, islside, setsec).
 - **Mappa**: MapLibre GL 4.7.1. Giorno: raster TomTom. Notte: vettoriale OpenFreeMap con 3 palette (`NIGHT`).
   Traffico TomTom con filtro canvas (`ctraffic`).
 - **Navigazione**: percorsi TomTom (traffico, alternative) con Valhalla di riserva; `navUpdate` aggancia la posizione
