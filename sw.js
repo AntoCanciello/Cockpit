@@ -1,8 +1,8 @@
 // Cockpit: la pagina parte subito dalla memoria del telefono (niente attesa della rete all'avvio,
 // quindi niente schermo bianco prima dell'introduzione). La versione nuova arriva in sottofondo:
 // il controllo aggiornamenti dell'app la trova e ricarica con ?v=…, che passa sempre dalla rete.
-const CACHE = 'cockpit-v2';
-const CORE = ['./', 'bmw-logo.png', 'bmw-logo-white.png', 'manifest.webmanifest'];
+const CACHE = 'cockpit-v3';
+const CORE = ['./', 'bmw-logo.png', 'bmw-logo-white.png', 'fiat-logo-white.png', 'manifest.webmanifest'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));

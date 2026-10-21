@@ -28,6 +28,7 @@ ambienti cloud di Claude Code). Su un altro computer cambiare `executablePath`.
 | t96 | pulsante Casa con «apri l'app Alexa»: prima il trigger, poi la radio in pausa e `alexa://`; al ritorno la radio riparte (spento: nessun salto) |
 | t97 | verticale: barra in fondo con angoli concentrici, pulsanti quadrati, meteo e radio in due quadrati, cornetta verde nell'angolo in basso a sinistra della mappa (contatti a tutta larghezza) |
 | t98 | iPad Air 11": home, contatti, impostazioni, ricerca, matita, rotazione; pagina impaginata su ~600 punti di lato corto (×1,37), niente isola |
+| t99 | marca del veicolo: iPad FIAT 500X, iPhone BMW C 400 GT (barra, introduzione, titolo); incollando le impostazioni il veicolo resta del dispositivo |
 
 L'isola dinamica in Chromium non esiste: le prove la simulano impostando la larghezza dell'elemento
 `#islProbe` (che nell'app legge `env(safe-area-inset-left/right)`).
