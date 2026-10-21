@@ -1,5 +1,5 @@
 // Verticale (iPhone Air 420×912, barre di sicurezza simulate): barra in fondo con angoli concentrici allo schermo,
-// pulsanti quadrati, meteo e radio in due quadrati, cornetta verde nell'angolo in basso a sinistra della mappa
+// pulsanti quadrati, meteo e radio in due quadrati, cornetta verde nell'angolo in basso a sinistra della mappa, alla stessa distanza dai bordi della freccia
 // (i contatti aperti prendono tutto il quadrato), cornetta della barra = cornetta verde
 import { chromium } from 'playwright';
 import fs from 'node:fs';
@@ -30,6 +30,7 @@ console.log(await p.evaluate(() => {
     `meteo: icona ${Math.round(ic.width)}px, centro x ${Math.round((ic.left + ic.right) / 2 - pc.left)}/${Math.round(pc.width)}, y ${Math.round((ic.top + ic.bottom) / 2 - pc.top)}/${Math.round(pc.height)} | tocca testi: ${['.w-city', '.w-date', '.w-temp', '.w-desc', '.w-mm'].some(s => hit(ic, txt(s)))} | tocca cornetta: ${hit(ic, call)}`,
     `quadrati: meteo ${Math.round(pc.width)}×${Math.round(pc.height)}, radio ${Math.round(radio.width)}×${Math.round(radio.height)}`,
     `cornetta verde: dentro ${document.querySelector('#cToggle').parentNode.id}, a ${Math.round(call.left - map.left)}px da sinistra e ${Math.round(map.bottom - call.bottom)}px dal fondo della mappa`,
+    (a => `freccia: a ${Math.round(map.right - a.right)}px da destra e ${Math.round(map.bottom - a.bottom)}px dal fondo della mappa`)(r('#fabToggle')),
     `cornetta della barra uguale a quella verde: ${same}`].join('\n'); }), '\n' + (errs.join(' ') || 'no errors'));
 await p.click('#cToggle'); await p.waitForTimeout(500); await p.screenshot({ path: 'portrait_open.png' });
 console.log(await p.evaluate(() => { const pc = document.querySelector('#pContacts').getBoundingClientRect(), rows = [...document.querySelectorAll('#pContacts .contact')].map(e => e.getBoundingClientRect());
