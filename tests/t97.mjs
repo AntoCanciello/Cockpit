@@ -1,5 +1,6 @@
 // Verticale (iPhone Air 420×912, barre di sicurezza simulate): barra in fondo con angoli concentrici allo schermo,
-// pulsanti quadrati, icona del meteo grande e verso il centro senza toccare i testi, cornetta della barra = cornetta verde
+// pulsanti quadrati, meteo e radio in due quadrati, cornetta verde nell'angolo in basso a sinistra della mappa
+// (i contatti aperti prendono tutto il quadrato), cornetta della barra = cornetta verde
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--headless=new'], ignoreDefaultArgs: ['--headless=old'] });
@@ -22,10 +23,17 @@ console.log(await p.evaluate(() => {
   const btns = [...document.querySelectorAll('.rail .nav-btn')].map(e => e.getBoundingClientRect());
   const hit = (a, b) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
   const txt = s => { const rg = document.createRange(); rg.selectNodeContents(document.querySelector(s)); return rg.getBoundingClientRect(); };
-  const ic = r('.w-ico'), pc = r('#pContacts'), call = r('#cToggle');
+  const ic = r('.w-ico'), pc = r('#pContacts'), call = r('#cToggle'), map = r('#pMap'), radio = r('#pRadio');
   const same = document.querySelector('[data-go="contacts"] path').getAttribute('d') === document.querySelector('#cToggle .ico-tel path').getAttribute('d');
   return [`barra: fondo a ${Math.round(innerHeight - rail.bottom)}px dal bordo, alta ${Math.round(rail.height)}, angoli in basso ${cs.borderBottomLeftRadius}/${cs.borderBottomRightRadius}`,
     `pulsanti: ${btns.map(b => Math.round(b.width) + '×' + Math.round(b.height)).join(' ')} | uno dentro l'altro: ${btns.some((b, i) => i && hit(b, btns[i - 1]))}`,
     `meteo: icona ${Math.round(ic.width)}px, centro x ${Math.round((ic.left + ic.right) / 2 - pc.left)}/${Math.round(pc.width)}, y ${Math.round((ic.top + ic.bottom) / 2 - pc.top)}/${Math.round(pc.height)} | tocca testi: ${['.w-city', '.w-date', '.w-temp', '.w-desc', '.w-mm'].some(s => hit(ic, txt(s)))} | tocca cornetta: ${hit(ic, call)}`,
+    `quadrati: meteo ${Math.round(pc.width)}×${Math.round(pc.height)}, radio ${Math.round(radio.width)}×${Math.round(radio.height)}`,
+    `cornetta verde: dentro ${document.querySelector('#cToggle').parentNode.id}, a ${Math.round(call.left - map.left)}px da sinistra e ${Math.round(map.bottom - call.bottom)}px dal fondo della mappa`,
     `cornetta della barra uguale a quella verde: ${same}`].join('\n'); }), '\n' + (errs.join(' ') || 'no errors'));
+await p.click('#cToggle'); await p.waitForTimeout(500); await p.screenshot({ path: 'portrait_open.png' });
+console.log(await p.evaluate(() => { const pc = document.querySelector('#pContacts').getBoundingClientRect(), rows = [...document.querySelectorAll('#pContacts .contact')].map(e => e.getBoundingClientRect());
+  return `contatti aperti: righe larghe ${rows.map(r => Math.round(r.width)).join('/')} su ${Math.round(pc.width)} | ✕ dentro ${document.querySelector('#cToggle').parentNode.id}`; }));
+await p.click('#cToggle'); await p.waitForTimeout(400);
+console.log('dopo la ✕:', await p.evaluate(() => document.querySelector('#pContacts').classList.contains('open') ? 'contatti ancora aperti' : 'contatti chiusi'));
 await b.close();
