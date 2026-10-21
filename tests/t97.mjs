@@ -32,7 +32,9 @@ console.log(await p.evaluate(() => {
     `cornetta verde: dentro ${document.querySelector('#cToggle').parentNode.id}, a ${Math.round(call.left - map.left)}px da sinistra e ${Math.round(map.bottom - call.bottom)}px dal fondo della mappa`,
     (a => `freccia: a ${Math.round(map.right - a.right)}px da destra e ${Math.round(map.bottom - a.bottom)}px dal fondo della mappa`)(r('#fabToggle')),
     `cornetta della barra uguale a quella verde: ${same}`].join('\n'); }), '\n' + (errs.join(' ') || 'no errors'));
-await p.click('#cToggle'); await p.waitForTimeout(500); await p.screenshot({ path: 'portrait_open.png' });
+await p.evaluate(() => { window.__st = 0; const t0 = performance.now(), f = () => { window.__st = Math.max(window.__st, document.querySelector('#cList').scrollTop); if (performance.now() - t0 < 1300) requestAnimationFrame(f); }; requestAnimationFrame(f); });
+await p.click('#cToggle'); await p.waitForTimeout(1400); await p.screenshot({ path: 'portrait_open.png' });
+console.log('apertura contatti: la lista scorre da sola di', await p.evaluate(() => window.__st), 'px (deve essere 0)');
 console.log(await p.evaluate(() => { const pc = document.querySelector('#pContacts').getBoundingClientRect(), rows = [...document.querySelectorAll('#pContacts .contact')].map(e => e.getBoundingClientRect());
   return `contatti aperti: righe larghe ${rows.map(r => Math.round(r.width)).join('/')} su ${Math.round(pc.width)} | ✕ dentro ${document.querySelector('#cToggle').parentNode.id}`; }));
 await p.click('#cToggle'); await p.waitForTimeout(400);
