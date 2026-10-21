@@ -26,6 +26,7 @@ ambienti cloud di Claude Code). Su un altro computer cambiare `executablePath`.
 | t78, t79, t85 | matita (larghezza dei riquadri), contenuti responsive, icona del meteo |
 | t94, t95 | pulsante Casa con l'indirizzo del trigger Alexa (esito verde / rosso) |
 | t96 | pulsante Casa con «apri l'app Alexa»: prima il trigger, poi la radio in pausa e `alexa://`; al ritorno la radio riparte (spento: nessun salto) |
+| t97 | verticale: barra in fondo con angoli concentrici allo schermo, pulsanti quadrati, icona del meteo grande al centro, cornetta uguale a quella verde |
 
 L'isola dinamica in Chromium non esiste: le prove la simulano impostando la larghezza dell'elemento
 `#islProbe` (che nell'app legge `env(safe-area-inset-left/right)`).
