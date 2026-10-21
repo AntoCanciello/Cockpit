@@ -13,7 +13,16 @@ for (const actAlexa of [true, false]) {
   p.on('framenavigated', f => { if (f.url().startsWith('alexa:')) ev.push('nav alexa'); });
   await p.goto(new URL('../index.html', import.meta.url).href); await p.waitForTimeout(3000); await p.mouse.click(456, 60);
   await p.evaluate(() => document.getElementById('pRadio').classList.add('act')); await p.waitForTimeout(400);
+  // radio accesa (finta: basta lo stato «in riproduzione»), poi pulsante Casa
+  await p.evaluate(() => { const a = document.getElementById('audio'); a.__p = true; Object.defineProperty(a, 'paused', { configurable: true, get: () => !!a.__p }); a.play = () => { a.__p = false; return Promise.resolve(); }; a.pause = () => { a.__p = true; }; });
+  await p.evaluate(() => document.getElementById('play').click()); await p.waitForTimeout(300);
+  const before = await p.evaluate(() => !document.getElementById('audio').paused);
   await p.click('#actBtn'); await p.waitForTimeout(1200);
+  const after = await p.evaluate(() => !document.getElementById('audio').paused);
+  ev.push(`radio ${before ? 'accesa' : 'spenta'}→${after ? 'accesa' : 'spenta'}`);
+  // ritorno nel Cockpit dall'app Alexa: la radio riparte da sola
+  await p.evaluate(() => document.dispatchEvent(new Event('visibilitychange'))); await p.waitForTimeout(500);
+  ev.push(`al ritorno ${await p.evaluate(() => !document.getElementById('audio').paused) ? 'accesa' : 'spenta'}`);
   const diag = await p.evaluate(() => (localStorage.getItem('cockpit.diag') || '') + JSON.stringify(window.__diag?.lines?.slice?.(-5) || ''));
   console.log('actAlexa', actAlexa, '| eventi:', ev.join(' → ') || 'nessuno', '| diario apre Alexa:', /apro l'app Alexa/.test(diag), '|', errs.join(' ') || 'no errors');
   await ctx.close();
