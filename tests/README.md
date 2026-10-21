@@ -27,6 +27,7 @@ ambienti cloud di Claude Code). Su un altro computer cambiare `executablePath`.
 | t94, t95 | pulsante Casa con l'indirizzo del trigger Alexa (esito verde / rosso) |
 | t96 | pulsante Casa con «apri l'app Alexa»: prima il trigger, poi la radio in pausa e `alexa://`; al ritorno la radio riparte (spento: nessun salto) |
 | t97 | verticale: barra in fondo con angoli concentrici, pulsanti quadrati, meteo e radio in due quadrati, cornetta verde nell'angolo in basso a sinistra della mappa (contatti a tutta larghezza) |
+| t98 | iPad Air (`node t98.mjs out.png 1180 820`, anche 820 1180, 1366 1024, 1024 1366; quarto argomento map/radio/contacts): pagina impaginata su ~600 punti di lato corto, niente isola |
 
 L'isola dinamica in Chromium non esiste: le prove la simulano impostando la larghezza dell'elemento
 `#islProbe` (che nell'app legge `env(safe-area-inset-left/right)`).

@@ -47,6 +47,9 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
 - **Pulsante Casa** (swipe in su sulla radio): chiama l'indirizzo del trigger Alexa (`cfg.actUrl`, fetch no-cors,
   pulsante verde/rosso per 1 s) oppure il comando dell'app Comandi (`cfg.actName`).
 - Animazioni con `setShown(el, show, kind)` (WAAPI) e `motion()` che rispetta «Riduci movimento».
+- **iPad**: uno script in `<head>` riconosce l'iPad e cambia il meta viewport (`#vp`) in `width=lato/S` con
+  S = lato corto/600 (tra 1,25 e 1,5): la pagina si impagina come un telefono grande e iOS la ingrandisce.
+  `window.__pad = {S, w}`; classe `tablet` su `#stage`, niente isola, mappa con `pixelRatio` × S. Prova: `tests/t98.mjs`.
 
 ## Prove
 ```bash
