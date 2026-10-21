@@ -1,7 +1,7 @@
-// Marca del veicolo: iPad parte con FIAT 500X (logo e introduzione FIAT), iPhone con BMW C 400 GT; incollando le impostazioni
+// Veicolo: iPad FIAT 500X auto (logo e introduzione FIAT), iPhone scooter BMW C 400 GT; incollando le impostazioni
 // da un dispositivo all'altro il veicolo resta quello del dispositivo
 import { chromium } from 'playwright';
-const S0 = './'; // screenshot b_ipad_*.png qui accanto
+const S0 = process.env.OUT || './'; // screenshot b_ipad_*.png
 const IPAD = 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--headless=new'], ignoreDefaultArgs: ['--headless=old'] });
 const open = async (pad, pre) => {
@@ -11,7 +11,7 @@ const open = async (pad, pre) => {
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message)); p.errs = errs;
   await p.goto(new URL('../index.html', import.meta.url).href); return p;
 };
-const st = p => p.evaluate(() => { const c = JSON.parse(localStorage.getItem('cockpit.v1') || '{}'); return `barra ${document.querySelector('#brandSlot img').getAttribute('src')} | intro ${document.querySelector('.splash-logo').getAttribute('src')} ${document.getElementById('splash').classList.contains('fiat') ? 'FIAT' : 'BMW'} | titolo «${document.title}» | salvato marca ${c.brand} modello ${c.vehicle}`; });
+const st = p => p.evaluate(() => { const c = JSON.parse(localStorage.getItem('cockpit.v1') || '{}'); return `barra ${document.querySelector('#brandSlot img').getAttribute('src')} | intro ${document.querySelector('.splash-logo').getAttribute('src')} ${document.getElementById('splash').classList.contains('fiat') ? 'FIAT' : 'BMW'} | titolo «${document.title}» | salvato tipo ${c.vtype} modello ${c.vehicle}`; });
 // iPad nuovo: intro FIAT
 let p = await open(true); await p.waitForTimeout(1900); await p.screenshot({ path: S0 + 'b_ipad_intro.png' });
 await p.waitForTimeout(1800); await p.mouse.click(590, 200); await p.waitForTimeout(400); await p.screenshot({ path: S0 + 'b_ipad_home.png' });
