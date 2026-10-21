@@ -49,7 +49,8 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
 - Animazioni con `setShown(el, show, kind)` (WAAPI) e `motion()` che rispetta «Riduci movimento».
 - **iPad**: uno script in `<head>` riconosce l'iPad e cambia il meta viewport (`#vp`) in `width=lato/S` con
   S = lato corto/600 (tra 1,25 e 1,5): la pagina si impagina come un telefono grande e iOS la ingrandisce.
-  `window.__pad = {S, w}`; classe `tablet` su `#stage`, niente isola, mappa con `pixelRatio` × S. Prova: `tests/t98.mjs`.
+  `window.__pad = {S, w, k()}` (k = ingrandimento reale, nel diario e in Info → Schermo); classe `tablet` su `#stage`,
+  niente isola, mappa e onda disegnate × k. Schermate di avvio iPad Air in `splash/`. Prova: `tests/t98.mjs`.
 
 ## Prove
 ```bash
