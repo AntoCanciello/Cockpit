@@ -31,8 +31,9 @@ ambienti cloud di Claude Code). Su un altro computer cambiare `executablePath`.
 | t99 | veicolo: iPad FIAT 500X auto (barra, introduzione, titolo), iPhone scooter BMW C 400 GT; incollando le impostazioni il veicolo resta del dispositivo |
 | t100 | iPad: le 4 app (2 sopra e 2 sotto) nella pagina in giù del riquadro della radio (swipe in giù app, in su «Casa»); sull'iPhone non ci sono |
 | t101 | iPad: YouTube nella metà alta (meteo e radio nascosti, mappa sotto): ricerca, video, ingrandisci, chiudi |
-| t102 | iPad: RaiPlay (griglia dei canali) e TGCOM24 (diretta) nella metà alta, animazione di apertura e chiusura |
+| t102 | iPad: RaiPlay (griglia dei canali) nella metà alta, animazione di apertura e chiusura |
 | t103 | iPad: Mediaset Infinity (canali Mediaset in diretta), loghi dei canali Rai e Mediaset nelle tessere |
+| t104 | iPad: Twitch (nome del canale, lettore ufficiale, preferiti) |
 
 L'isola dinamica in Chromium non esiste: le prove la simulano impostando la larghezza dell'elemento
 `#islProbe` (che nell'app legge `env(safe-area-inset-left/right)`).

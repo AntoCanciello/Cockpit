@@ -16,7 +16,7 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
 ## File
 - `index.html` — **tutta l'app** (HTML + CSS + JS in un file, ~3500 righe). Niente build.
 - `sw.js` — service worker: la pagina parte dalla memoria del telefono (niente lampo bianco); con `?v=` passa dalla rete.
-- `manifest.webmanifest`, `icon-*.png`, `bmw-logo.png`, `bmw-logo-white.png`, `fiat-logo.png`, `500x-logo.png` e `c400gt-logo.png` (barra e introduzione; `app-youtube.png`, `app-raiplay.png`, `app-tgcom24.png`, `app-infinity.png` icone ufficiali del pannello app; `ch/*.png` loghi dei canali Rai e Mediaset;
+- `manifest.webmanifest`, `icon-*.png`, `bmw-logo.png`, `bmw-logo-white.png`, `fiat-logo.png`, `500x-logo.png` e `c400gt-logo.png` (barra e introduzione; `app-youtube.png`, `app-raiplay.png`, `app-infinity.png`, `app-twitch.png` icone ufficiali del pannello app; `ch/*.png` loghi dei canali Rai e Mediaset;
   FIAT solo sull'iPad, BMW sull'iPhone; in Impostazioni → Veicolo `cfg.vtype` auto/moto/scooter e `cfg.vehicle`),
   `splash/*.png` (schermate di lancio iOS), `awake.mp4/webm` (video invisibile anti-standby).
 - `tests/` — prove Playwright (vedi `tests/README.md`).
@@ -56,14 +56,16 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   barra), iPad `black` (pagina sotto la barra). Con la pagina dietro la barra, sull'iPad iOS toglie 32 pt in fondo (banda nera
   fuori dalla pagina, misurata da screenshot: non si riempie né allungando `#stage` né col fondo di `html`, anche senza ingrandimento).
   App (`#appDock` in `#appsPage`, `DOCK_APPS`, `cfg.dockApps`): pagina in giù del riquadro della radio (solo iPad; `radioPage(n)`:
-  -1 app, 0 radio, 1 «Casa»; dopo 20 s senza tocchi torna alla radio), 2 file da 2 senza vetro: YouTube, RaiPlay, Mediaset Infinity, TGCOM24.
+  -1 app, 0 radio, 1 «Casa»; dopo 20 s senza tocchi torna alla radio), 2 file da 2 senza vetro: YouTube, RaiPlay, Mediaset Infinity, Twitch.
   YouTube (`win: true`) apre `#pYt`: classe `ytopen` su `#app`, spariscono meteo e radio, YouTube sopra e mappa sotto
   (⤢ = `ytbig`, tutto a YouTube). Ricerca con `cfg.ytKey` (YouTube Data API, solo nel localStorage) o senza chiave via
   Piped/Invidious; video in iframe embed; radio ferma e poi ripresa; oltre 10 km/h il video si copre finché non si tocca
   «Sono un passeggero». Prova: `tests/t101.mjs`. Nello stesso riquadro (`data-app`): RaiPlay (griglia `RAI`, video iOS dal relinker
   `mediapolis.rai.it` provato in 3 varianti con `mVideo()`, solo Italia; se non parte, pulsante per raiplay.it).
   Mediaset Infinity (griglia `MS`, sigle Mediaset c5, i1, r4…): flussi in chiaro `msHls(sigla)` (live02/live03-seg.msf.cdn.mediaset.net
-  `ch-xx/xx-clr.isml` e di riserva live3-mediaset-it.akamaized.net); se non va, sito. TGCOM24 = `msHls('kf')`, a tutto riquadro.
+  `ch-xx/xx-clr.isml` e di riserva live3-mediaset-it.akamaized.net); se non va, sito. TGCOM24 è tra i canali (`kf`).
+  Twitch: lettore ufficiale `player.twitch.tv/?channel=…&parent=<dominio>` in iframe; niente ricerca (servirebbe chiave+account):
+  nome del canale (anche l'indirizzo intero) e preferiti in `cfg.twitch` (max 12, ✕ per togliere). Prova: `tests/t104.mjs`.
   Loghi dei canali in `ch/<id>.png` (da tv-logo/tv-logos), tessere `chTile()`; i loghi bianchi hanno il fondino scuro. Prova: `tests/t103.mjs`.
   Sky TG24 tolto (blocca tutto). Prime Video, Netflix, Disney+ tolti: non si lasciano incorporare (DRM, niente iframe).
   Icona di Mediaset Infinity `app-infinity.png` (mandata da Antonio). Radio sull'iPad: niente stato «In onda/In pausa», logo più grande e più in basso.
