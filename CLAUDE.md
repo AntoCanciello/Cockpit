@@ -59,8 +59,8 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   Piped/Invidious; video in iframe embed; radio ferma e poi ripresa; oltre 10 km/h il video si copre finché non si tocca
   «Sono un passeggero». Prova: `tests/t101.mjs`. Nello stesso riquadro (`data-app`): RaiPlay (griglia `RAI`, video iOS dal relinker
   `mediapolis.rai.it` provato in 3 varianti con `mVideo()`, solo Italia; se non parte, pulsante per raiplay.it) e Sky TG24
-  (sito ufficiale: flussi HLS OFF e TACT, poi API `apid.sky.it`; se nessuno va, pulsante per tg24.sky.it/diretta in Safari:
-  Sky non si lascia mettere in iframe). Tutto nel diario.
+  (diretta del canale YouTube `SKY_YT`: Sky vieta l'embed e il sito blocca flussi/API/iframe, quindi id della diretta e
+  flusso HLS da Invidious/Piped nel `<video>`; se non va, pulsante per l'app YouTube sulla diretta). Tutto nel diario.
   Apertura/chiusura/⤢ con `morphLayout()`: chi sparisce sfuma, chi resta scivola con un ritaglio, chi arriva compare (t102).
 
 ## Prove

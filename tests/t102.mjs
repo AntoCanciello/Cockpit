@@ -8,8 +8,9 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
   const calls = [];
   await ctx.route('**/*', r => { const u = r.request().url();
     if (u.startsWith('file://') || u.startsWith('data:')) return r.continue();
-    if (u.includes('tg24.sky.it')) { calls.push('sito sky'); return r.abort(); }
-    if (u.includes('skycdn') || u.includes('apid.sky.it')) { calls.push(u.includes('apid') ? 'api sky' : 'flusso sky'); return r.abort(); }
+    if (u.includes('/channels/UCz6E3lF72mb6uoJ-mOlNo2A/streams')) { calls.push('dirette sky'); return r.fulfill({ json: { videos: [{ videoId: 'SKYLIVE0001', liveNow: true }] }, headers: { 'access-control-allow-origin': '*' } }); }
+    if (u.includes('/streams/SKYLIVE0001')) { calls.push('flusso sky'); return r.fulfill({ json: { hls: 'https://proxy.example/live.m3u8' }, headers: { 'access-control-allow-origin': '*' } }); }
+    if (u.includes('live.m3u8')) { calls.push('video sky'); return r.abort(); }
     if (u.includes('mediapolis.rai.it')) { calls.push('rai ' + u.split('cont=')[1]); return r.abort(); }
     return r.abort(); });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
