@@ -8,7 +8,8 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
   const calls = [];
   await ctx.route('**/*', r => { const u = r.request().url();
     if (u.startsWith('file://') || u.startsWith('data:')) return r.continue();
-    if (u.includes('youtube.com/embed')) { calls.push('embed ' + u.split('embed/')[1].split('&')[0]); return r.fulfill({ contentType: 'text/html', body: '<body style="margin:0;background:#06c;color:#fff;font:20px sans-serif;display:grid;place-items:center;height:100vh">SKY TG24</body>' }); }
+    if (u.includes('tg24.sky.it')) { calls.push('sito sky'); return r.fulfill({ contentType: 'text/html', body: '<body style="margin:0;background:#06c;color:#fff;font:20px sans-serif;display:grid;place-items:center;height:100vh">SKY TG24</body>' }); }
+    if (u.includes('skycdn') || u.includes('apid.sky.it')) { calls.push(u.includes('apid') ? 'api sky' : 'flusso sky'); return r.abort(); }
     if (u.includes('mediapolis.rai.it')) { calls.push('rai ' + u.split('cont=')[1]); return r.abort(); }
     return r.abort(); });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
@@ -21,10 +22,10 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
   await p.click('.dapp[data-app="raiplay"]');
   console.log(tag, 'apertura RaiPlay:\n ' + (await frames).filter((_, i) => i % 5 === 0).join('\n '));
   await p.waitForTimeout(300); await p.screenshot({ path: S0 + `m_${tag}_rai.png` });
-  await p.click('.rai-ch[data-rai="rai1"]'); await p.waitForTimeout(1200); await p.screenshot({ path: S0 + `m_${tag}_rai_err.png` });
-  await p.click('.dapp[data-app="skytg24"]'); await p.waitForTimeout(1000); await p.screenshot({ path: S0 + `m_${tag}_sky.png` });
+  await p.click('.rai-ch[data-rai="rai1"]'); await p.waitForTimeout(2500); await p.screenshot({ path: S0 + `m_${tag}_rai_err.png` });
+  await p.click('.dapp[data-app="skytg24"]'); await p.waitForTimeout(2500); await p.screenshot({ path: S0 + `m_${tag}_sky.png` });
   await p.click('#ytClose'); await p.waitForTimeout(900); await p.screenshot({ path: S0 + `m_${tag}_closed.png` });
-  console.log(' ', calls.join(', '), '| chiuso:', await p.evaluate(() => !document.getElementById('app').classList.contains('ytopen')), '|', errs.join(' ') || 'ok');
+  console.log(' ', calls.join(', '), '| diario:', await p.evaluate(() => (localStorage.getItem('cockpit.diag') || '').match(/(raiplay|sky tg24)[^"]*/g)?.join(' / ')), '| chiuso:', await p.evaluate(() => !document.getElementById('app').classList.contains('ytopen')), '|', errs.join(' ') || 'ok');
   await ctx.close();
 }
 await b.close();
