@@ -53,7 +53,7 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   `window.__pad = {S, w, k()}` (k = ingrandimento reale, nel diario e in Info → Schermo); classe `tablet` su `#stage`,
   niente isola, mappa e onda disegnate × k. Schermate di avvio iPad Air in `splash/`. Prova: `tests/t98.mjs`.
   App (`#appDock` in `#appsPage`, `DOCK_APPS`, `cfg.dockApps`): pagina in giù del riquadro della radio (solo iPad; `radioPage(n)`:
-  -1 app, 0 radio, 1 «Casa»; dopo 20 s senza tocchi torna alla radio), 2 file da 2 senza vetro: YouTube, RaiPlay, TGCOM24, Mediaset Infinity.
+  -1 app, 0 radio, 1 «Casa»; dopo 20 s senza tocchi torna alla radio), 2 file da 2 senza vetro: YouTube, RaiPlay, Mediaset Infinity, TGCOM24.
   YouTube (`win: true`) apre `#pYt`: classe `ytopen` su `#app`, spariscono meteo e radio, YouTube sopra e mappa sotto
   (⤢ = `ytbig`, tutto a YouTube). Ricerca con `cfg.ytKey` (YouTube Data API, solo nel localStorage) o senza chiave via
   Piped/Invidious; video in iframe embed; radio ferma e poi ripresa; oltre 10 km/h il video si copre finché non si tocca
