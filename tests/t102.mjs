@@ -8,7 +8,7 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
   const calls = [];
   await ctx.route('**/*', r => { const u = r.request().url();
     if (u.startsWith('file://') || u.startsWith('data:')) return r.continue();
-    if (u.includes('tg24.sky.it')) { calls.push('sito sky'); return r.fulfill({ contentType: 'text/html', body: '<body style="margin:0;background:#06c;color:#fff;font:20px sans-serif;display:grid;place-items:center;height:100vh">SKY TG24</body>' }); }
+    if (u.includes('tg24.sky.it')) { calls.push('sito sky'); return r.abort(); }
     if (u.includes('skycdn') || u.includes('apid.sky.it')) { calls.push(u.includes('apid') ? 'api sky' : 'flusso sky'); return r.abort(); }
     if (u.includes('mediapolis.rai.it')) { calls.push('rai ' + u.split('cont=')[1]); return r.abort(); }
     return r.abort(); });
