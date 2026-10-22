@@ -61,6 +61,7 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   `mediapolis.rai.it` provato in 3 varianti con `mVideo()`, solo Italia; se non parte, pulsante per raiplay.it) e Sky TG24
   (diretta del canale YouTube `SKY_YT`: Sky vieta l'embed e il sito blocca flussi/API/iframe, quindi id della diretta e
   flusso HLS da Invidious/Piped nel `<video>`; se non va, pulsante per la diretta su m.youtube.com in Safari, da staccare in PiP). Tutto nel diario.
+  TGCOM24: flusso in chiaro Mediaset `TGCOM_HLS` (live02/live03-seg.msf.cdn.mediaset.net, ch-kf) nel `<video>`; se non va, sito.
   Apertura/chiusura/⤢ con `morphLayout()`: chi sparisce sfuma, chi resta scivola con un ritaglio, chi arriva compare (t102).
 
 ## Prove
