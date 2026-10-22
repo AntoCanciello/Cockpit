@@ -52,6 +52,9 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   S = lato corto/600 (tra 1,25 e 1,5): la pagina si impagina come un telefono grande e iOS la ingrandisce.
   `window.__pad = {S, w, k()}` (k = ingrandimento reale, nel diario e in Info → Schermo); classe `tablet` su `#stage`,
   niente isola, mappa e onda disegnate × k. Schermate di avvio iPad Air in `splash/`. Prova: `tests/t98.mjs`.
+  Meta viewport e barra di stato scritti con `document.write` all'avvio: iPhone `black-translucent` (pagina anche dietro la
+  barra), iPad `black` (pagina sotto la barra). Con la pagina dietro la barra, sull'iPad iOS toglie 32 pt in fondo (banda nera
+  fuori dalla pagina, misurata da screenshot: non si riempie né allungando `#stage` né col fondo di `html`, anche senza ingrandimento).
   App (`#appDock` in `#appsPage`, `DOCK_APPS`, `cfg.dockApps`): pagina in giù del riquadro della radio (solo iPad; `radioPage(n)`:
   -1 app, 0 radio, 1 «Casa»; dopo 20 s senza tocchi torna alla radio), 2 file da 2 senza vetro: YouTube, RaiPlay, Mediaset Infinity, TGCOM24.
   YouTube (`win: true`) apre `#pYt`: classe `ytopen` su `#app`, spariscono meteo e radio, YouTube sopra e mappa sotto
