@@ -30,6 +30,7 @@ ambienti cloud di Claude Code). Su un altro computer cambiare `executablePath`.
 | t98 | iPad Air 11": home, contatti, impostazioni, ricerca, matita, rotazione; pagina impaginata su ~600 punti di lato corto (×1,37), niente isola |
 | t99 | veicolo: iPad FIAT 500X auto (barra, introduzione, titolo), iPhone scooter BMW C 400 GT; incollando le impostazioni il veicolo resta del dispositivo |
 | t100 | iPad: pannello delle app nella mappa (1/3 × 1/4, 2 file da 3, sopra la cornetta in verticale), YouTube; sull'iPhone non c'è |
+| t101 | iPad: YouTube in una finestra sulla mappa (ricerca, video, ingrandisci, chiudi) |
 
 L'isola dinamica in Chromium non esiste: le prove la simulano impostando la larghezza dell'elemento
 `#islProbe` (che nell'app legge `env(safe-area-inset-left/right)`).
