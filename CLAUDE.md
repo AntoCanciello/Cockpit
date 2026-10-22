@@ -16,7 +16,7 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
 ## File
 - `index.html` — **tutta l'app** (HTML + CSS + JS in un file, ~3500 righe). Niente build.
 - `sw.js` — service worker: la pagina parte dalla memoria del telefono (niente lampo bianco); con `?v=` passa dalla rete.
-- `manifest.webmanifest`, `icon-*.png`, `bmw-logo.png`, `bmw-logo-white.png`, `fiat-logo.png`, `500x-logo.png` e `c400gt-logo.png` (barra e introduzione; `app-youtube.png`, `app-raiplay.png`, `app-tgcom24.png` icone ufficiali del pannello app; `ch/*.png` loghi dei canali Rai e Mediaset;
+- `manifest.webmanifest`, `icon-*.png`, `bmw-logo.png`, `bmw-logo-white.png`, `fiat-logo.png`, `500x-logo.png` e `c400gt-logo.png` (barra e introduzione; `app-youtube.png`, `app-raiplay.png`, `app-tgcom24.png`, `app-infinity.png` icone ufficiali del pannello app; `ch/*.png` loghi dei canali Rai e Mediaset;
   FIAT solo sull'iPad, BMW sull'iPhone; in Impostazioni → Veicolo `cfg.vtype` auto/moto/scooter e `cfg.vehicle`),
   `splash/*.png` (schermate di lancio iOS), `awake.mp4/webm` (video invisibile anti-standby).
 - `tests/` — prove Playwright (vedi `tests/README.md`).
@@ -63,7 +63,7 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   `ch-xx/xx-clr.isml` e di riserva live3-mediaset-it.akamaized.net); se non va, sito. TGCOM24 = `msHls('kf')`, a tutto riquadro.
   Loghi dei canali in `ch/<id>.png` (da tv-logo/tv-logos), tessere `chTile()`; i loghi bianchi hanno il fondino scuro. Prova: `tests/t103.mjs`.
   Sky TG24 tolto (blocca tutto). Prime Video, Netflix, Disney+ tolti: non si lasciano incorporare (DRM, niente iframe).
-  Icona di Mediaset Infinity provvisoria (SVG). Radio sull'iPad: niente stato «In onda/In pausa», logo più grande e più in basso.
+  Icona di Mediaset Infinity `app-infinity.png` (mandata da Antonio). Radio sull'iPad: niente stato «In onda/In pausa», logo più grande e più in basso.
   Apertura/chiusura/⤢ con `morphLayout()`: chi sparisce sfuma, chi resta scivola con un ritaglio, chi arriva compare (t102).
 
 ## Prove
