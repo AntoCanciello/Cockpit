@@ -16,7 +16,7 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
 ## File
 - `index.html` — **tutta l'app** (HTML + CSS + JS in un file, ~3500 righe). Niente build.
 - `sw.js` — service worker: la pagina parte dalla memoria del telefono (niente lampo bianco); con `?v=` passa dalla rete.
-- `manifest.webmanifest`, `icon-*.png`, `bmw-logo.png`, `bmw-logo-white.png`, `fiat-logo.png`, `500x-logo.png` e `c400gt-logo.png` (barra e introduzione:
+- `manifest.webmanifest`, `icon-*.png`, `bmw-logo.png`, `bmw-logo-white.png`, `fiat-logo.png`, `500x-logo.png` e `c400gt-logo.png` (barra e introduzione; `app-raiplay.png`, `app-skytg24.png` icone ufficiali del pannello app;
   FIAT solo sull'iPad, BMW sull'iPhone; in Impostazioni → Veicolo `cfg.vtype` auto/moto/scooter e `cfg.vehicle`),
   `splash/*.png` (schermate di lancio iOS), `awake.mp4/webm` (video invisibile anti-standby).
 - `tests/` — prove Playwright (vedi `tests/README.md`).
