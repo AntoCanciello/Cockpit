@@ -57,7 +57,9 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   YouTube (`win: true`) apre `#pYt`: classe `ytopen` su `#app`, spariscono meteo e radio, YouTube sopra e mappa sotto
   (⤢ = `ytbig`, tutto a YouTube). Ricerca con `cfg.ytKey` (YouTube Data API, solo nel localStorage) o senza chiave via
   Piped/Invidious; video in iframe embed; radio ferma e poi ripresa; oltre 10 km/h il video si copre finché non si tocca
-  «Sono un passeggero». Prova: `tests/t101.mjs`.
+  «Sono un passeggero». Prova: `tests/t101.mjs`. Nello stesso riquadro (`data-app`): RaiPlay (griglia `RAI`, video iOS dal relinker
+  `mediapolis.rai.it`, solo Italia; se non parte, pulsante per raiplay.it) e Sky TG24 (diretta YouTube `live_stream?channel=`).
+  Apertura/chiusura/⤢ con `morphLayout()`: chi sparisce sfuma, chi resta scivola con un ritaglio, chi arriva compare (t102).
 
 ## Prove
 ```bash
