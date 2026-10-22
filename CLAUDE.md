@@ -52,6 +52,8 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   S = lato corto/600 (tra 1,25 e 1,5): la pagina si impagina come un telefono grande e iOS la ingrandisce.
   `window.__pad = {S, w, k()}` (k = ingrandimento reale, nel diario e in Info → Schermo); classe `tablet` su `#stage`,
   niente isola, mappa e onda disegnate × k. Schermate di avvio iPad Air in `splash/`. Prova: `tests/t98.mjs`.
+  Pannello delle app nella mappa (`#appDock`, `DOCK_APPS`, `cfg.dockApps`): apre l'app con il suo indirizzo (es. `youtube://`),
+  se dopo 1,5 s la pagina è ancora visibile apre il sito; nascosto in navigazione.
 
 ## Prove
 ```bash
