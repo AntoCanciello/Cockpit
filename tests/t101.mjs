@@ -1,4 +1,4 @@
-// iPad: YouTube in una finestra sulla mappa (ricerca finta via Piped, video incorporato), ingrandisci e chiudi
+// iPad: YouTube nella metà alta (riquadri laterali nascosti, mappa sotto), ricerca finta via Piped, video, ingrandisci e chiudi
 import { chromium } from 'playwright';
 const S0 = process.env.OUT || './'; // screenshot yt_*.png
 const IPAD = 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
@@ -18,10 +18,12 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
   await p.fill('#ytQ', 'gol serie a'); await p.press('#ytQ', 'Enter'); await p.waitForTimeout(800);
   await p.click('.yt-item >> nth=1'); await p.waitForTimeout(800);
   await p.screenshot({ path: S0 + `yt_${w}.png` });
-  console.log(w, await p.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(); const m = r('#pMap'), y = r('#ytWin'), pl = r('#ytPlayer');
-    return `finestra ${Math.round(y.width)}×${Math.round(y.height)} a ${Math.round(y.left - m.left)},${Math.round(y.top - m.top)} (mappa ${Math.round(m.width)}×${Math.round(m.height)}) | video ${Math.round(pl.width)}×${Math.round(pl.height)} | risultati ${document.querySelectorAll('.yt-item').length}`; }), '|', calls.join(', '), '|', errs.join(' ') || 'ok');
+  console.log(w, await p.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(); const m = r('#pMap'), y = r('#pYt'), pl = r('#ytPlayer'), it = r('.yt-item'), tx = r('.yt-item b'), L = r('.yt-list');
+    const vis = s => getComputedStyle(document.querySelector(s)).display !== 'none';
+    return `YouTube ${Math.round(y.width)}×${Math.round(y.height)} in alto (${Math.round(y.top)}), mappa ${Math.round(m.width)}×${Math.round(m.height)} sotto (${Math.round(m.top)}) | meteo ${vis('#pContacts') ? 'visibile' : 'nascosto'}, radio ${vis('#pRadio') ? 'visibile' : 'nascosta'} | video ${Math.round(pl.width)}×${Math.round(pl.height)} | risultati ${document.querySelectorAll('.yt-item').length}, testo dentro la colonna ${tx.right <= L.right + 1}`; }), '|', calls.join(', '), '|', errs.join(' ') || 'ok');
   await p.click('#ytBig'); await p.waitForTimeout(500); await p.screenshot({ path: S0 + `yt_${w}_big.png` });
-  await p.click('#ytClose'); await p.waitForTimeout(500); console.log('  chiusa:', await p.evaluate(() => document.getElementById('ytWin').hidden));
+  console.log('  ingrandito: YouTube alto', await p.evaluate(() => Math.round(document.getElementById('pYt').getBoundingClientRect().height)));
+  await p.click('#ytClose'); await p.waitForTimeout(500); console.log('  chiuso:', await p.evaluate(() => !document.getElementById('app').classList.contains('ytopen') && getComputedStyle(document.getElementById('pRadio')).display !== 'none'));
   await ctx.close();
 }
 await b.close();

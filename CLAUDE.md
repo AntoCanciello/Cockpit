@@ -54,9 +54,10 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   niente isola, mappa e onda disegnate × k. Schermate di avvio iPad Air in `splash/`. Prova: `tests/t98.mjs`.
   Pannello delle app nella mappa (`#appDock`, `DOCK_APPS`, `cfg.dockApps`): apre l'app con il suo indirizzo (es. `youtube://`),
   se dopo 1,5 s la pagina è ancora visibile apre il sito; in navigazione sale sopra il riquadro dei tempi (e la cornetta).
-  YouTube (`win: true`) si apre invece in `#ytWin` sulla mappa: ricerca con `cfg.ytKey` (YouTube Data API, solo nel
-  localStorage) o senza chiave via Piped/Invidious; video in iframe embed; radio ferma e poi ripresa; oltre 10 km/h il video
-  si copre (resta l'audio). Prova: `tests/t101.mjs`.
+  YouTube (`win: true`) apre `#pYt`: classe `ytopen` su `#app`, spariscono meteo e radio, YouTube sopra e mappa sotto
+  (⤢ = `ytbig`, tutto a YouTube). Ricerca con `cfg.ytKey` (YouTube Data API, solo nel localStorage) o senza chiave via
+  Piped/Invidious; video in iframe embed; radio ferma e poi ripresa; oltre 10 km/h il video si copre finché non si tocca
+  «Sono un passeggero». Prova: `tests/t101.mjs`.
 
 ## Prove
 ```bash
