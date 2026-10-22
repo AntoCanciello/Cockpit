@@ -29,7 +29,7 @@ ambienti cloud di Claude Code). Su un altro computer cambiare `executablePath`.
 | t97 | verticale: barra in fondo con angoli concentrici, pulsanti quadrati, meteo e radio in due quadrati, cornetta verde nell'angolo in basso a sinistra della mappa (contatti a tutta larghezza) |
 | t98 | iPad Air 11": home, contatti, impostazioni, ricerca, matita, rotazione; pagina impaginata su ~600 punti di lato corto (×1,37), niente isola |
 | t99 | veicolo: iPad FIAT 500X auto (barra, introduzione, titolo), iPhone scooter BMW C 400 GT; incollando le impostazioni il veicolo resta del dispositivo |
-| t100 | iPad: pannello delle app nella mappa (1/3 × 1/4, 2 file da 3, sopra la cornetta in verticale), YouTube; sull'iPhone non c'è |
+| t100 | iPad: le 6 app nella pagina in giù del riquadro della radio (swipe in giù app, in su «Casa»), YouTube; sull'iPhone non ci sono |
 | t101 | iPad: YouTube nella metà alta (meteo e radio nascosti, mappa sotto): ricerca, video, ingrandisci, chiudi |
 | t102 | iPad: RaiPlay (griglia dei canali) e Sky TG24 (diretta) nella metà alta, animazione di apertura e chiusura |
 

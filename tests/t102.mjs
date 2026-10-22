@@ -18,11 +18,11 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
   // apertura: fotogrammi dell'animazione
   const frames = p.evaluate(() => new Promise(res => { const out = [], t0 = performance.now(); const f = () => { const r = s => { const e = document.querySelector(s); const b = e.getBoundingClientRect(); return getComputedStyle(e).display === 'none' ? '-' : `${Math.round(b.top)}/${Math.round(b.height)} o${(+getComputedStyle(e).opacity).toFixed(1)}`; };
     out.push(`${Math.round(performance.now() - t0)}ms mappa ${r('#pMap')} yt ${r('#pYt')} radio ${r('#pRadio')}`); if (performance.now() - t0 < 700) requestAnimationFrame(f); else res(out); }; requestAnimationFrame(f); }));
-  await p.click('.dapp[data-app="raiplay"]');
+  await p.evaluate(() => document.querySelector('#pRadio').classList.add('apps')); await p.waitForTimeout(450); await p.click('.dapp[data-app="raiplay"]');
   console.log(tag, 'apertura RaiPlay:\n ' + (await frames).filter((_, i) => i % 5 === 0).join('\n '));
   await p.waitForTimeout(300); await p.screenshot({ path: S0 + `m_${tag}_rai.png` });
   await p.click('.rai-ch[data-rai="rai1"]'); await p.waitForTimeout(2500); await p.screenshot({ path: S0 + `m_${tag}_rai_err.png` });
-  await p.click('.dapp[data-app="tgcom24"]'); await p.waitForTimeout(2500); await p.screenshot({ path: S0 + `m_${tag}_tgcom.png` });
+  await p.click('#ytClose'); await p.waitForTimeout(900); await p.evaluate(() => document.querySelector('#pRadio').classList.add('apps')); await p.waitForTimeout(450); await p.click('.dapp[data-app="tgcom24"]'); await p.waitForTimeout(2500); await p.screenshot({ path: S0 + `m_${tag}_tgcom.png` });
   await p.click('#ytClose'); await p.waitForTimeout(900); await p.screenshot({ path: S0 + `m_${tag}_closed.png` });
   console.log(' ', calls.join(', '), '| diario:', await p.evaluate(() => (localStorage.getItem('cockpit.diag') || '').match(/(raiplay|tgcom24)[^"]*/g)?.join(' / ')), '| chiuso:', await p.evaluate(() => !document.getElementById('app').classList.contains('ytopen')), '|', errs.join(' ') || 'ok');
   await ctx.close();

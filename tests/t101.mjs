@@ -14,7 +14,7 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
     return r.abort(); });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(new URL('../index.html', import.meta.url).href); await p.waitForTimeout(3300); await p.mouse.click(w / 2, 200); await p.waitForTimeout(300);
-  await p.click('.dapp[data-app="youtube"]'); await p.waitForTimeout(500);
+  await p.evaluate(() => document.querySelector('#pRadio').classList.add('apps')); await p.waitForTimeout(450); await p.click('.dapp[data-app="youtube"]'); await p.waitForTimeout(500);
   await p.fill('#ytQ', 'gol serie a'); await p.press('#ytQ', 'Enter'); await p.waitForTimeout(800);
   await p.click('.yt-item >> nth=1'); await p.waitForTimeout(800);
   await p.screenshot({ path: S0 + `yt_${w}.png` });
