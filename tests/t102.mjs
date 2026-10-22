@@ -1,4 +1,4 @@
-// iPad: RaiPlay (canali) e Sky TG24 (diretta) nella metà alta; fotogrammi dell'animazione di apertura; chiusura
+// iPad: RaiPlay (canali) e TGCOM24 (diretta) nella metà alta; fotogrammi dell'animazione di apertura; chiusura
 import { chromium } from 'playwright';
 const S0 = process.env.OUT || './'; // screenshot m_*.png
 const IPAD = 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
@@ -8,9 +8,7 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
   const calls = [];
   await ctx.route('**/*', r => { const u = r.request().url();
     if (u.startsWith('file://') || u.startsWith('data:')) return r.continue();
-    if (u.includes('/channels/UCz6E3lF72mb6uoJ-mOlNo2A/streams')) { calls.push('dirette sky'); return r.fulfill({ json: { videos: [{ videoId: 'SKYLIVE0001', liveNow: true }] }, headers: { 'access-control-allow-origin': '*' } }); }
-    if (u.includes('/streams/SKYLIVE0001')) { calls.push('flusso sky'); return r.fulfill({ json: { hls: 'https://proxy.example/live.m3u8' }, headers: { 'access-control-allow-origin': '*' } }); }
-    if (u.includes('live.m3u8')) { calls.push('video sky'); return r.abort(); }
+    if (u.includes('mediaset.net')) { calls.push('tgcom24 ' + u.split('/')[2].split('-')[0]); return r.abort(); }
     if (u.includes('mediapolis.rai.it')) { calls.push('rai ' + u.split('cont=')[1]); return r.abort(); }
     return r.abort(); });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
@@ -24,9 +22,9 @@ for (const [w, h] of [[1180, 820], [820, 1180]]) {
   console.log(tag, 'apertura RaiPlay:\n ' + (await frames).filter((_, i) => i % 5 === 0).join('\n '));
   await p.waitForTimeout(300); await p.screenshot({ path: S0 + `m_${tag}_rai.png` });
   await p.click('.rai-ch[data-rai="rai1"]'); await p.waitForTimeout(2500); await p.screenshot({ path: S0 + `m_${tag}_rai_err.png` });
-  await p.click('.dapp[data-app="skytg24"]'); await p.waitForTimeout(2500); await p.screenshot({ path: S0 + `m_${tag}_sky.png` });
+  await p.click('.dapp[data-app="tgcom24"]'); await p.waitForTimeout(2500); await p.screenshot({ path: S0 + `m_${tag}_tgcom.png` });
   await p.click('#ytClose'); await p.waitForTimeout(900); await p.screenshot({ path: S0 + `m_${tag}_closed.png` });
-  console.log(' ', calls.join(', '), '| diario:', await p.evaluate(() => (localStorage.getItem('cockpit.diag') || '').match(/(raiplay|sky tg24)[^"]*/g)?.join(' / ')), '| chiuso:', await p.evaluate(() => !document.getElementById('app').classList.contains('ytopen')), '|', errs.join(' ') || 'ok');
+  console.log(' ', calls.join(', '), '| diario:', await p.evaluate(() => (localStorage.getItem('cockpit.diag') || '').match(/(raiplay|tgcom24)[^"]*/g)?.join(' / ')), '| chiuso:', await p.evaluate(() => !document.getElementById('app').classList.contains('ytopen')), '|', errs.join(' ') || 'ok');
   await ctx.close();
 }
 await b.close();

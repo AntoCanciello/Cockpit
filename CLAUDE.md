@@ -16,7 +16,7 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
 ## File
 - `index.html` — **tutta l'app** (HTML + CSS + JS in un file, ~3500 righe). Niente build.
 - `sw.js` — service worker: la pagina parte dalla memoria del telefono (niente lampo bianco); con `?v=` passa dalla rete.
-- `manifest.webmanifest`, `icon-*.png`, `bmw-logo.png`, `bmw-logo-white.png`, `fiat-logo.png`, `500x-logo.png` e `c400gt-logo.png` (barra e introduzione; `app-youtube.png`, `app-raiplay.png`, `app-skytg24.png` icone ufficiali del pannello app;
+- `manifest.webmanifest`, `icon-*.png`, `bmw-logo.png`, `bmw-logo-white.png`, `fiat-logo.png`, `500x-logo.png` e `c400gt-logo.png` (barra e introduzione; `app-youtube.png`, `app-raiplay.png`, `app-tgcom24.png` icone ufficiali del pannello app;
   FIAT solo sull'iPad, BMW sull'iPhone; in Impostazioni → Veicolo `cfg.vtype` auto/moto/scooter e `cfg.vehicle`),
   `splash/*.png` (schermate di lancio iOS), `awake.mp4/webm` (video invisibile anti-standby).
 - `tests/` — prove Playwright (vedi `tests/README.md`).
@@ -58,11 +58,10 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   (⤢ = `ytbig`, tutto a YouTube). Ricerca con `cfg.ytKey` (YouTube Data API, solo nel localStorage) o senza chiave via
   Piped/Invidious; video in iframe embed; radio ferma e poi ripresa; oltre 10 km/h il video si copre finché non si tocca
   «Sono un passeggero». Prova: `tests/t101.mjs`. Nello stesso riquadro (`data-app`): RaiPlay (griglia `RAI`, video iOS dal relinker
-  `mediapolis.rai.it` provato in 3 varianti con `mVideo()`, solo Italia; se non parte, pulsante per raiplay.it) e Sky TG24
-  (diretta del canale YouTube `SKY_YT`: Sky vieta l'embed e il sito blocca flussi/API/iframe, quindi id della diretta e
-  flusso HLS da Invidious/Piped nel `<video>`; se non va, pulsante per la diretta su m.youtube.com in Safari, da staccare in PiP). Tutto nel diario.
+  `mediapolis.rai.it` provato in 3 varianti con `mVideo()`, solo Italia; se non parte, pulsante per raiplay.it).
+  Sky TG24 tolto: blocca flussi, API, iframe ed embed YouTube (niente link non ufficiali). Tutto nel diario.
   Streaming (Prime Video `aiv://`, Netflix `nflx://`, Disney+ `disneyplus://`): apre l'app dell'iPad, se manca il sito; nessuna
-  password nel Cockpit (i login restano nelle app/Safari). Dock di 6: TGCOM24 pronta ma fuori dalla lista predefinita.
+  password nel Cockpit (i login restano nelle app/Safari). Dock di 6: YouTube, RaiPlay, TGCOM24 / Prime Video, Netflix, Disney+.
   TGCOM24: flusso in chiaro Mediaset `TGCOM_HLS` (live02/live03-seg.msf.cdn.mediaset.net, ch-kf) nel `<video>`; se non va, sito.
   Apertura/chiusura/⤢ con `morphLayout()`: chi sparisce sfuma, chi resta scivola con un ritaglio, chi arriva compare (t102).
 
