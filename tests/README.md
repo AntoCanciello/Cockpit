@@ -24,6 +24,7 @@ ambienti cloud di Claude Code). Su un altro computer cambiare `executablePath`.
 | t66, t67 | modalità mancino |
 | t68, t72, t88 | isola dinamica: forme attorno all'isola, cambi di schermata, pulsante di ripristino |
 | t78, t79, t85 | matita (larghezza dei riquadri), contenuti responsive, icona del meteo |
+| t105 | YouTube recenti e preferiti, account Twitch collegato e canali seguiti (API finte), iPhone e iPad |
 | t94, t95 | pulsante Casa con l'indirizzo del trigger Alexa (esito verde / rosso) |
 | t96 | pulsante Casa con «apri l'app Alexa»: prima il trigger, poi la radio in pausa e `alexa://`; al ritorno la radio riparte (spento: nessun salto) |
 | t97 | verticale: barra in fondo con angoli concentrici, pulsanti quadrati, meteo e radio in due quadrati, cornetta verde nell'angolo in basso a sinistra della mappa (contatti a tutta larghezza) |

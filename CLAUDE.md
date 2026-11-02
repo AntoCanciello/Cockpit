@@ -66,6 +66,12 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   `ch-xx/xx-clr.isml` e di riserva live3-mediaset-it.akamaized.net); se non va, sito. TGCOM24 è tra i canali (`kf`).
   Twitch: lettore ufficiale `player.twitch.tv/?channel=…&parent=<dominio>` in iframe; niente ricerca (servirebbe chiave+account):
   nome del canale (anche l'indirizzo intero) e preferiti in `cfg.twitch` (max 12, ✕ per togliere). Prova: `tests/t104.mjs`.
+  YouTube: video guardati (`cfg.ytHist`, max 30) e preferiti con la ⭐ (`cfg.ytFav`) mostrati all'apertura e con la ricerca vuota
+  (la cronologia vera dell'account Google non è leggibile da nessuna app). Twitch: account collegabile in Impostazioni → App con il
+  Client ID di un'app «Public» su dev.twitch.tv (Device Code Flow su id.twitch.tv: codice da scrivere su twitch.tv/activate, poi
+  rinnovo senza segreto; token in `cfg.twAuth`, solo sul dispositivo); in Twitch compaiono i «Canali che segui» (Helix
+  channels/followed + streams/followed, prima quelli in diretta). Pagina delle app e finestra video anche sull'iPhone: in orizzontale
+  video e mappa affiancati (il video dove stanno i riquadri). Prova: `tests/t105.mjs` (API Twitch finte).
   Loghi dei canali in `ch/<id>.png` (da tv-logo/tv-logos), tessere `chTile()`; i loghi bianchi hanno il fondino scuro. Prova: `tests/t103.mjs`.
   Sky TG24 tolto (blocca tutto). Prime Video, Netflix, Disney+ tolti: non si lasciano incorporare (DRM, niente iframe).
   Icona di Mediaset Infinity `app-infinity.png` (mandata da Antonio). Radio sull'iPad: niente stato «In onda/In pausa», logo più grande e più in basso.

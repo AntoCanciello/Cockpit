@@ -1,0 +1,54 @@
+// YouTube: recenti e preferiti; Twitch: account collegato (API finte) con i canali seguiti; tutto anche su iPhone
+import { chromium } from 'playwright';
+const S0 = process.env.OUT || './';
+const IPAD = 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--headless=new'], ignoreDefaultArgs: ['--headless=old'] });
+const CORS = { 'access-control-allow-origin': '*' };
+for (const [lab, vp, scr, ua, lefty] of [['iphone', { width: 912, height: 420 }, { width: 912, height: 420 }, undefined, false], ['iphone-mancino', { width: 912, height: 420 }, { width: 912, height: 420 }, undefined, true], ['ipad', { width: 1180, height: 820 }, { width: 820, height: 1180 }, IPAD, false]]) {
+  const ctx = await b.newContext({ viewport: vp, screen: scr, isMobile: true, hasTouch: true, userAgent: ua, deviceScaleFactor: 2 });
+  await ctx.addInitScript(([l]) => { Object.defineProperty(screen, 'orientation', { value: { angle: 90, type: 'landscape-primary', addEventListener() {} }, configurable: true }); window.orientation = 90;
+    if (!sessionStorage.x) { sessionStorage.x = 1; localStorage.setItem('cockpit.v1', JSON.stringify({ lefty: l, glass: 'glass-light', wall: 'aurora', radioItV1: true, radioItV2: true, radioOrderV3: true, radioKKNV4: true, radioTgcomV5: true })); } }, [lefty]);
+  let polls = 0;
+  await ctx.route('**/*', async r => { const u = r.request().url();
+    if (u.startsWith('file://') || u.startsWith('data:')) return r.continue();
+    if (u.includes('pipedapi.kavin.rocks')) return r.fulfill({ json: { items: Array.from({ length: 5 }, (_, i) => ({ url: `/watch?v=abcdefghij${i}`, title: `Video di prova ${i + 1}`, uploaderName: 'Canale ' + i, thumbnail: '', duration: 125 })) }, headers: CORS });
+    if (u.includes('youtube.com/embed') || u.includes('player.twitch.tv')) return r.fulfill({ contentType: 'text/html', body: '<body style="margin:0;background:#222"></body>' });
+    if (u.endsWith('/oauth2/device')) return r.fulfill({ json: { device_code: 'DEV', user_code: 'ABCD1234', verification_uri: 'https://www.twitch.tv/activate?public=true&device-code=ABCD1234', expires_in: 1800, interval: 5 }, headers: CORS });
+    if (u.endsWith('/oauth2/token')) return ++polls < 2 ? r.fulfill({ status: 400, json: { status: 400, message: 'authorization_pending' }, headers: CORS }) : r.fulfill({ json: { access_token: 'AT', refresh_token: 'RT', expires_in: 14000, scope: ['user:read:follows'], token_type: 'bearer' }, headers: CORS });
+    if (u.endsWith('/oauth2/validate')) return r.fulfill({ json: { client_id: 'x', login: 'antonio', user_id: '42', scopes: ['user:read:follows'] }, headers: CORS });
+    if (u.includes('/helix/users')) return r.fulfill({ json: { data: [{ id: '42', login: 'antonio', display_name: 'Antonio' }] }, headers: CORS });
+    if (u.includes('/helix/channels/followed')) return r.fulfill({ json: { data: [{ broadcaster_login: 'zeb89', broadcaster_name: 'Zeb89' }, { broadcaster_login: 'ilmasseo', broadcaster_name: 'IlMasseo' }, { broadcaster_login: 'pow3r', broadcaster_name: 'Pow3r' }] }, headers: CORS });
+    if (u.includes('/helix/streams/followed')) return r.fulfill({ json: { data: [{ user_login: 'pow3r', user_name: 'Pow3r', game_name: 'Fortnite', viewer_count: 5000 }] }, headers: CORS });
+    return r.abort(); });
+  const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+  await p.clock.install();
+  await p.goto(new URL('../index.html', import.meta.url).href); await p.clock.runFor(3500); await p.mouse.click(vp.width / 2, 200); await p.clock.runFor(300);
+  // swipe in giù sul riquadro della radio → pagina delle app (anche sull'iPhone)
+  await p.evaluate(() => { const r = document.querySelector('#pRadio'); r.classList.add('apps'); }); await p.clock.runFor(500);
+  const dockVis = await p.evaluate(() => getComputedStyle(document.getElementById('appsPage')).display !== 'none' && document.querySelectorAll('.dapp').length);
+  await p.click('.dapp[data-app="youtube"]'); await p.clock.runFor(900);
+  const empty = await p.textContent('#ytList');
+  await p.fill('#ytQ', 'gol'); await p.press('#ytQ', 'Enter'); await p.clock.runFor(800);
+  await p.click('[data-ytfav="abcdefghij3"]'); await p.clock.runFor(100);
+  await p.click('.yt-item >> nth=1'); await p.clock.runFor(800);
+  await p.fill('#ytQ', ''); await p.press('#ytQ', 'Enter'); await p.clock.runFor(300);
+  const home = await p.evaluate(() => [...document.querySelectorAll('#ytList .v-sec, #ytList .yt-item b')].map(e => e.firstChild.textContent).join(' / '));
+  await p.screenshot({ path: S0 + `v105_${lab}_yt.png` });
+  const lay = await p.evaluate(() => { const r = s => document.querySelector(s).getBoundingClientRect(); const y = r('#pYt'), m = r('#pMap'); return `video ${Math.round(y.left)}-${Math.round(y.right)} × ${Math.round(y.height)} | mappa ${Math.round(m.left)}-${Math.round(m.right)}`; });
+  // Twitch: collega l'account dalle impostazioni
+  await p.evaluate(() => { document.querySelector('#openSettings').click(); document.querySelector('button[data-sec="app"]').click(); }); await p.clock.runFor(500);
+  await p.fill('#sTwClient', 'abcdefghij0123456789abcdefghij'); await p.click('#twLink'); await p.waitForTimeout(400); await p.clock.runFor(300);
+  const code = await p.textContent('#twCodeTxt');
+  await p.clock.runFor(12000);
+  const state = await p.textContent('#twState');
+  await p.screenshot({ path: S0 + `v105_${lab}_set.png` });
+  await p.evaluate(() => document.querySelector('.tbtn.save').click()); await p.clock.runFor(600);
+  await p.evaluate(() => document.querySelector('#pRadio').classList.add('apps')); await p.clock.runFor(300);
+  await p.evaluate(() => document.querySelector('.dapp[data-app="twitch"]').click()); await p.clock.runFor(1500); await p.waitForTimeout(800); await p.clock.runFor(200);
+  const tw = await p.evaluate(() => [...document.querySelectorAll('#ytList .v-sec, #ytList .rai-ch')].map(e => e.classList.contains('v-sec') ? '[' + e.textContent + ']' : e.dataset.tw + (e.classList.contains('live') ? '(live)' : '')).join(' '));
+  await p.screenshot({ path: S0 + `v105_${lab}_tw.png` });
+  const saved = await p.evaluate(() => { const c = JSON.parse(localStorage.getItem('cockpit.v1')); return `fav ${c.ytFav.map(v => v.id.slice(-1))} hist ${c.ytHist.map(v => v.id.slice(-1))} tw ${c.twAuth && c.twAuth.name}`; });
+  console.log(lab, `| app sulla radio: ${dockVis} | vuoto: «${empty.trim().slice(0, 40)}…» | ${lay}\n  YouTube: ${home}\n  codice: ${/ABCD1234/.test(code)} → ${state}\n  Twitch: ${tw}\n  salvato: ${saved} | ${errs.join(' ') || 'ok'}`);
+  await ctx.close();
+}
+await b.close();
