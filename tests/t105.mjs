@@ -1,5 +1,6 @@
 // YouTube: canali preferiti, pagina del canale, video sopra e lista sotto; Twitch: account collegato (API finte) con i canali seguiti; tutto anche su iPhone
 import { chromium } from 'playwright';
+import fs from 'fs';
 const S0 = process.env.OUT || './';
 const IPAD = 'Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--headless=new'], ignoreDefaultArgs: ['--headless=old'] });
@@ -18,9 +19,11 @@ for (const [lab, vp, scr, ua, lefty] of [['iphone', { width: 912, height: 420 },
     if (u.endsWith('/oauth2/device')) return r.fulfill({ json: { device_code: 'DEV', user_code: 'ABCD1234', verification_uri: 'https://www.twitch.tv/activate?public=true&device-code=ABCD1234', expires_in: 1800, interval: 5 }, headers: CORS });
     if (u.endsWith('/oauth2/token')) return ++polls < 2 ? r.fulfill({ status: 400, json: { status: 400, message: 'authorization_pending' }, headers: CORS }) : r.fulfill({ json: { access_token: 'AT', refresh_token: 'RT', expires_in: 14000, scope: ['user:read:follows'], token_type: 'bearer' }, headers: CORS });
     if (u.endsWith('/oauth2/validate')) return r.fulfill({ json: { client_id: 'x', login: 'antonio', user_id: '42', scopes: ['user:read:follows'] }, headers: CORS });
+    if (u.includes('/helix/users?login')) return r.fulfill({ json: { data: ['zeb89', 'ilmasseo', 'pow3r'].map(l => ({ login: l, profile_image_url: `https://static-cdn.jtvnw.net/jtv_user_pictures/${l}-profile_image-300x300.png` })) }, headers: CORS });
+    if (u.includes('static-cdn.jtvnw.net')) return r.fulfill({ body: fs.readFileSync(new URL(u.includes('previews') ? './tile.png' : './traffic.png', import.meta.url)), contentType: 'image/png' });
     if (u.includes('/helix/users')) return r.fulfill({ json: { data: [{ id: '42', login: 'antonio', display_name: 'Antonio' }] }, headers: CORS });
     if (u.includes('/helix/channels/followed')) return r.fulfill({ json: { data: [{ broadcaster_login: 'zeb89', broadcaster_name: 'Zeb89' }, { broadcaster_login: 'ilmasseo', broadcaster_name: 'IlMasseo' }, { broadcaster_login: 'pow3r', broadcaster_name: 'Pow3r' }] }, headers: CORS });
-    if (u.includes('/helix/streams/followed')) return r.fulfill({ json: { data: [{ user_login: 'pow3r', user_name: 'Pow3r', game_name: 'Fortnite', viewer_count: 5000 }] }, headers: CORS });
+    if (u.includes('/helix/streams/followed')) return r.fulfill({ json: { data: [{ user_login: 'pow3r', user_name: 'Pow3r', game_name: 'Fortnite', viewer_count: 5000, thumbnail_url: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_pow3r-{width}x{height}.jpg' }] }, headers: CORS });
     return r.abort(); });
   const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.clock.install();
@@ -56,7 +59,7 @@ for (const [lab, vp, scr, ua, lefty] of [['iphone', { width: 912, height: 420 },
   await p.evaluate(() => document.querySelector('.tbtn.save').click()); await p.clock.runFor(600);
   await p.evaluate(() => document.querySelector('#pRadio').classList.add('apps')); await p.clock.runFor(300);
   await p.evaluate(() => document.querySelector('.dapp[data-app="twitch"]').click()); await p.clock.runFor(1500); await p.waitForTimeout(800); await p.clock.runFor(200);
-  const tw = await p.evaluate(() => [...document.querySelectorAll('#ytList .v-sec, #ytList .rai-ch')].map(e => e.classList.contains('v-sec') ? '[' + e.textContent + ']' : e.dataset.tw + (e.classList.contains('live') ? '(live)' : '')).join(' '));
+  const tw = await p.evaluate(() => [...document.querySelectorAll('#ytList .v-sec, #ytList .rai-ch')].map(e => e.classList.contains('v-sec') ? '[' + e.textContent + ']' : e.dataset.tw + (e.classList.contains('live') ? '(live)' : '') + (e.querySelector('.prev img') ? '[anteprima]' : e.querySelector('.pic img') ? '[logo]' : '[iniziale]')).join(' '));
   await p.screenshot({ path: S0 + `v105_${lab}_tw.png` });
   const saved = await p.evaluate(() => { const c = JSON.parse(localStorage.getItem('cockpit.v1')); return `canali ${(c.ytCh || []).map(v => v.name)} tw ${c.twAuth && c.twAuth.name}`; });
   console.log(lab, `| app sulla radio: ${dockVis} | vuoto: «${empty.trim().slice(0, 40)}…» | ${lay}\n  YouTube: ${home}\n  codice: ${/ABCD1234/.test(code)} → ${state}\n  Twitch: ${tw}\n  salvato: ${saved} | ${errs.join(' ') || 'ok'}`);
