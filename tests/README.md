@@ -24,6 +24,7 @@ ambienti cloud di Claude Code). Su un altro computer cambiare `executablePath`.
 | t66, t67 | modalità mancino |
 | t68, t72, t88 | isola dinamica: forme attorno all'isola, cambi di schermata, pulsante di ripristino |
 | t78, t79, t85 | matita (larghezza dei riquadri), contenuti responsive, icona del meteo |
+| t109 | Copia chiavi / Incolla chiavi tra due dispositivi (il resto delle impostazioni non cambia) |
 | t108 | Twitch: tendina del canale con diretta e ultimi 3 video, lettore del video |
 | t107 | riordino dei canali (YouTube preferiti, Twitch seguiti) tenendo premuto e trascinando |
 | t106 | YouTube: video del canale anche quando la pagina del canale non risponde |
