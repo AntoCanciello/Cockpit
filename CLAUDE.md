@@ -73,7 +73,8 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   con il bordo Safari spostava il video dentro il lettore. Si allargano attorno all'isola solo i riquadri che toccano quel lato. Twitch: account collegabile in Impostazioni → App con il
   Client ID di un'app «Public» su dev.twitch.tv (Device Code Flow su id.twitch.tv: codice da scrivere su twitch.tv/activate, poi
   rinnovo senza segreto; token in `cfg.twAuth`, solo sul dispositivo); in Twitch compaiono i «Canali che segui» (Helix
-  channels/followed + streams/followed, prima quelli in diretta). Pagina delle app e finestra video anche sull'iPhone: in orizzontale
+  channels/followed + streams/followed, prima quelli in diretta). Tocco su un canale (con account collegato): tendina sotto con «Guarda la diretta»
+  (se in onda) e gli ultimi 3 video (Helix /videos, lettore `player.twitch.tv/?video=v<id>`). Liste canali riordinabili tenendo premuto (t107). Pagina delle app e finestra video anche sull'iPhone: in orizzontale
   video e mappa affiancati (il video dove stanno i riquadri). Prova: `tests/t105.mjs` (API Twitch finte).
   Loghi dei canali in `ch/<id>.png` (da tv-logo/tv-logos), tessere `chTile()`; i loghi bianchi hanno il fondino scuro. Prova: `tests/t103.mjs`.
   Sky TG24 tolto (blocca tutto). Prime Video, Netflix, Disney+ tolti: non si lasciano incorporare (DRM, niente iframe).
