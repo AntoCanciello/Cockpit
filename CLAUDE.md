@@ -66,8 +66,11 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   `ch-xx/xx-clr.isml` e di riserva live3-mediaset-it.akamaized.net); se non va, sito. TGCOM24 è tra i canali (`kf`).
   Twitch: lettore ufficiale `player.twitch.tv/?channel=…&parent=<dominio>` in iframe; niente ricerca (servirebbe chiave+account):
   nome del canale (anche l'indirizzo intero) e preferiti in `cfg.twitch` (max 12, ✕ per togliere). Prova: `tests/t104.mjs`.
-  YouTube: video guardati (`cfg.ytHist`, max 30) e preferiti con la ⭐ (`cfg.ytFav`) mostrati all'apertura e con la ricerca vuota
-  (la cronologia vera dell'account Google non è leggibile da nessuna app). Twitch: account collegabile in Impostazioni → App con il
+  YouTube: la ricerca mostra canali (fino a 3) e video; ⭐ sui **canali** (`cfg.ytCh`), mostrati all'apertura e con la ricerca vuota;
+  toccando un canale si aprono i suoi video recenti (`ytChannelVideos`: playlist UU… con la chiave, o Piped/Invidious). Con un video:
+  video nella metà sopra e lista sotto (affiancati solo se la finestra è larga più del doppio dell'altezza). Antonio non vuole
+  video preferiti né cronologia. La finestra video accanto all'isola usa il padding (non il bordo) per lo spazio verso l'isola:
+  con il bordo Safari spostava il video dentro il lettore. Si allargano attorno all'isola solo i riquadri che toccano quel lato. Twitch: account collegabile in Impostazioni → App con il
   Client ID di un'app «Public» su dev.twitch.tv (Device Code Flow su id.twitch.tv: codice da scrivere su twitch.tv/activate, poi
   rinnovo senza segreto; token in `cfg.twAuth`, solo sul dispositivo); in Twitch compaiono i «Canali che segui» (Helix
   channels/followed + streams/followed, prima quelli in diretta). Pagina delle app e finestra video anche sull'iPhone: in orizzontale
