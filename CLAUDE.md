@@ -60,7 +60,8 @@ Online: https://antocanciello.github.io/Cockpit/ — GitHub Pages pubblica `main
   YouTube (`win: true`) apre `#pYt`: classe `ytopen` su `#app`, spariscono meteo e radio, YouTube sopra e mappa sotto
   (⤢ = `ytbig`, tutto a YouTube). Ricerca con `cfg.ytKey` (YouTube Data API, solo nel localStorage) o senza chiave via
   Piped/Invidious; video in iframe embed; radio ferma e poi ripresa; oltre 10 km/h il video si copre finché non si tocca
-  «Sono un passeggero». Prova: `tests/t101.mjs`. Nello stesso riquadro (`data-app`): RaiPlay (griglia `RAI`, video iOS dal relinker
+  «Sono un passeggero» (vale 12 ore, `cockpit.passenger`; conta solo il GPS vero: `fastFixes` = 2 posizioni di fila con precisione ≤30 m;
+  si spegne in Impostazioni → App, `cfg.vidLock`). `#pYt` senza backdrop-filter: su iOS il video dentro il vetro sfocato a tratti diventava nero. Prova: `tests/t101.mjs`. Nello stesso riquadro (`data-app`): RaiPlay (griglia `RAI`, video iOS dal relinker
   `mediapolis.rai.it` provato in 3 varianti con `mVideo()`, solo Italia; se non parte, pulsante per raiplay.it).
   Mediaset Infinity (griglia `MS`, sigle Mediaset c5, i1, r4…): flussi in chiaro `msHls(sigla)` (live02/live03-seg.msf.cdn.mediaset.net
   `ch-xx/xx-clr.isml` e di riserva live3-mediaset-it.akamaized.net); se non va, sito. TGCOM24 è tra i canali (`kf`).
